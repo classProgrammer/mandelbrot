@@ -1,6 +1,6 @@
 #pragma once
 
-bool deviceNotFound();
+bool foundDevice();
 
 // template to measure a functions execution time
 

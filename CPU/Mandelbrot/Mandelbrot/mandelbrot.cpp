@@ -11,7 +11,32 @@
 #include "mandelbrotutil.h"
 #include "kernel.cuh"
 #include "pfc_threading.h"
-#include <iostream>
+#include <fstream>
+#include <vector>
+
+// define to store the bmp files
+#define STOREIMAGES
+
+// precalculated indices for value mapping
+std::vector<int> X_VAL;
+std::vector<int> Y_VAL;
+
+pfc::byte_t valueHost_opt(int const inner_idx, int const outer_index) {
+	// calculate the constant
+	pfc::complex<float> c(
+		(CX_MIN[outer_index] + X_VAL[inner_idx] / (WIDTH_FACTOR) * (CX_MAX[outer_index] - CX_MIN[outer_index])),
+		(CY_MIN[outer_index] + Y_VAL[inner_idx] / (HEIGHT_FACTOR) * (CY_MAX[outer_index] - CY_MIN[outer_index]))
+	);
+	// initialize z
+	pfc::complex<float> z(0.0f, 0.0f);
+	auto iterations{ 0 };
+	// calculate z
+	while (z.norm() < 4 && iterations++ < ITERATIONS) {
+		z = z.square() + c;
+	}
+	// set color gradient
+	return iterations < ITERATIONS ? COLORS[iterations] : 0;
+}
 // TODO:
 // CPU threads vs task with param settings when is what better
 // try to be creative with paralelism on CPU, e.g. 4 parallel images which are calculated parallel
@@ -21,237 +46,43 @@
 // microsoft gsl
 // types.h use on device 
 
-bool foundDevice() {
-	auto count{ 0 };
-	gpuErrchk(cudaGetDeviceCount(&count));
-	if (count < 1) return false;
+int calculateOnDevice_opt_v1(int const current_iteration) {
+	auto const memory_size{ PIXEL_PER_IMAGE * sizeof(pfc::byte_t) };
 
-	auto device_no{ 0 };
-	gpuErrchk(cudaSetDevice(device_no));
-
-	return true;
-}
-
-int calcAsyncFunction(float const& point_x, float const& point_y, int const thread_number, int const iterations, std::string const& prefix) {
-	auto zoom_factor{ 1.0f };
-	// calculate zoom_factor
-	for (auto i{ 1 }; i < thread_number; ++i) {
-		zoom_factor *= ZOOM_FACTOR;
-	}
-	// set field of view
-	auto const cx_min{ point_x + cx_min_factor * zoom_factor };
-	auto const cx_max{ point_x + cx_max_factor * zoom_factor };
-	auto const cy_min{ point_y + cy_min_factor * zoom_factor };
-	auto const cy_max{ point_y + cy_max_factor * zoom_factor };
-
-	// create the bitmap
+	// target host
 	pfc::bitmap const bmp{ WIDTH, HEIGHT };
-	auto s{ bmp.pixel_span().begin() };
+	//bmp.pixel_span().data()
+	auto data{ bmp.pixel_span().data() };
+	auto hp_destination{ std::make_unique<pfc::byte_t[]>(memory_size) };
 
-	// foreach point
-	for (auto i{ 0 }; i < HEIGHT; ++i) {
-		for (auto j{ 0 }; j < WIDTH; ++j) {
-			//calculate the color value
-			*s = { 0, 0, valueHost(j, i, cx_min, cy_min, cx_max, cy_max, iterations) };
-			++s;
-		}
-	}
-	// store image
-	bmp.to_file("./" + prefix + "_iter_" + std::to_string(thread_number) + ".bmp");
+	// target device
+	pfc::byte_t* dp_destination{ nullptr };
+	gpuErrchk(cudaMalloc(&dp_destination, memory_size));
 
-	return 0;
-}
+	call_mandel_kernel3(BLOCKS, THREADS, dp_destination, PIXEL_PER_IMAGE, current_iteration);
 
-int calcAsyncFunction2(std::unique_ptr<pfc::byte_t[]>& dest, int size, int const& pixel_per_thread,
-	float const& cx_min, float const& cx_max, float const& cy_min, float const& cy_max, int const start, int const end) {
+	gpuErrchk(cudaPeekAtLastError());
 
-	auto x{ start % WIDTH };
-	auto y{ start / WIDTH };
+	// retrieve result from GPU
+	gpuErrchk(cudaMemcpy(hp_destination.get(), dp_destination, memory_size, cudaMemcpyDeviceToHost));
 
-	// copy at thread position if the position is valid
-	if (start < size) {
-		for (auto i{ start }; i < end; ++i) {
-			dest[i] = valueDevice(x++, y, cx_min, cy_min, cx_max, cy_max, ITERATIONS);
-		}
-	}
-	return 0;
-}
-
-int calcAsyncFunction3(pfc::bitmap& dest, int size, int const& pixel_per_thread,
-	float const& cx_min, float const& cx_max, float const& cy_min, float const& cy_max, int const start, int const end) {
-
-	auto x{ start % WIDTH };
-	auto y{ start / WIDTH };
-
-	auto s{ dest.pixel_span().begin() };
-	std::advance(s, start);
-	// copy at thread position if the position is valid
-	if (start < size) {
-		for (auto i{ start }; i < end; ++i) {
-			*s = { 0, 0, valueDevice(x++, y, cx_min, cy_min, cx_max, cy_max, ITERATIONS) };
-			++s;
-		}
-	}
-	return 0;
-}
-
-int calcAsyncFunctionLoopUnroll(float const& point_x,
-	float const& point_y,
-	int const thread_number,
-	int const iterations,
-	std::string const& prefix,
-	int const innerTasksPixels)
-{
-	auto zoom_factor{ 1.0f };
-	// calculate zoom_factor
-	for (auto i{ 1 }; i < thread_number; ++i) {
-		zoom_factor *= ZOOM_FACTOR;
-	}
-	// set field of view
-	auto const cx_min{ point_x + cx_min_factor * zoom_factor };
-	auto const cx_max{ point_x + cx_max_factor * zoom_factor };
-	auto const cy_min{ point_y + cy_min_factor * zoom_factor };
-	auto const cy_max{ point_y + cy_max_factor * zoom_factor };
-
-	std::vector<std::future<int>> tasks;
-	auto dest{ std::make_unique<pfc::byte_t[]>(PIXEL_PER_IMAGE * sizeof(pfc::byte_t)) };
-
-	for (auto i{ 0 }; i < PIXEL_PER_IMAGE; i += innerTasksPixels) {
-		tasks.emplace_back(std::async(
-			std::launch::async,
-			&calcAsyncFunction2, std::ref(dest), PIXEL_PER_IMAGE, innerTasksPixels,
-			cx_min, cx_max, cy_min, cy_max, i, (i + innerTasksPixels)));
-	}
-
-	// wait for all points
-	for (auto i{ 0 }; i < tasks.size(); ++i) {
-		tasks[i].wait();
-	}
-
-	pfc::bitmap const bmp{ WIDTH, HEIGHT };
-	auto s{ bmp.pixel_span().begin() };
+	gpuErrchk(cudaFree(dp_destination));
+	// copy to bmp
 	for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
-		*s = { 0, 0, dest[i] };
-		++s;
+		data[i] = { 0, 0, hp_destination[i] };
 	}
-
-	// store image
-	bmp.to_file("./" + prefix + "_iter_" + std::to_string(thread_number) + ".bmp");
+	// store test image
+#ifdef STOREIMAGES
+	bmp.to_file("../img/gpu_opt_v1" + std::to_string(current_iteration + 1) + ".bmp");
+#endif // STOREIMAGES
 
 	return 0;
 }
 
-int calcAsyncFunctionLoopUnroll2(float const& point_x, float const& point_y, int const thread_number, int const iterations, std::string const& prefix, int const innerTasksPixels) {
+int calculateOnDevice(int const current_iteration) {
 	auto zoom_factor{ 1.0f };
 	// calculate zoom_factor
-	for (auto i{ 1 }; i < thread_number; ++i) {
-		zoom_factor *= ZOOM_FACTOR;
-	}
-	// set field of view
-	auto const cx_min{ point_x + cx_min_factor * zoom_factor };
-	auto const cx_max{ point_x + cx_max_factor * zoom_factor };
-	auto const cy_min{ point_y + cy_min_factor * zoom_factor };
-	auto const cy_max{ point_y + cy_max_factor * zoom_factor };
-
-	std::vector<std::future<int>> tasks;
-	pfc::bitmap bmp{ WIDTH, HEIGHT };
-
-	for (auto i{ 0 }; i < PIXEL_PER_IMAGE; i += innerTasksPixels) {
-		tasks.emplace_back(std::async(
-			std::launch::async,
-			&calcAsyncFunction3, std::ref(bmp), PIXEL_PER_IMAGE, innerTasksPixels,
-			cx_min, cx_max, cy_min, cy_max, i, (i + innerTasksPixels)));
-	}
-
-	// wait for all points
-	for (auto i{ 0 }; i < tasks.size(); ++i) {
-		tasks[i].wait();
-	}
-
-	// store image
-	bmp.to_file("./" + prefix + "_iter_" + std::to_string(thread_number) + ".bmp");
-
-	return 0;
-}
-
-// code to be executed on host
-void runOnHostOneThreadPerImage(int const images) {
-	std::vector<std::thread> threads;
-	std::string const prefix{ "th" };
-
-	// one thread foreach image
-	for (auto i{ 0 }; i < images; ++i) {
-		threads.emplace_back(std::thread(&calcAsyncFunction, point_x, point_y, i + 1, ITERATIONS, std::ref(prefix)));
-	}
-
-	// wait for all points
-	for (int i = 0; i < images; ++i) {
-		threads[i].join();
-	}
-}
-
-// code to be executed on host
-void runOnHostOneThreadPerImagePfc(int const images) {
-	std::string const prefix{ "th" };
-
-	pfc::parallel_range(true, images, images, [prefix](int idx, int begin, int end) {
-		calcAsyncFunction(point_x, point_y, idx, ITERATIONS, prefix);
-		});
-}
-
-// code to be executed on host
-void runOnHostOneTaskPerImage(int const images) {
-	std::vector<std::future<int>> tasks;
-	std::string const prefix{ "ta" };
-
-	// one thread foreach image
-	for (auto i{ 0 }; i < images; ++i) {
-		tasks.emplace_back(std::async(std::launch::async, &calcAsyncFunction, point_x, point_y, i + 1, ITERATIONS, std::ref(prefix)));
-	}
-
-	// wait for all points
-	for (int i = 0; i < images; ++i) {
-		tasks[i].wait();
-	}
-}
-
-// code to be executed on host
-void runOnHostOneTaskPerImageLoopUnroll(int const images, int const innerTasksPixels) {
-	std::vector<std::future<int>> tasks;
-	std::string const prefix{ "ur" };
-
-	// one thread foreach image
-	for (auto i{ 0 }; i < images; ++i) {
-		tasks.emplace_back(std::async(std::launch::async, &calcAsyncFunctionLoopUnroll, point_x, point_y, i + 1, ITERATIONS, std::ref(prefix), innerTasksPixels));
-	}
-
-	// wait for all points
-	for (int i = 0; i < images; ++i) {
-		tasks[i].wait();
-	}
-}
-
-// code to be executed on host
-void runOnHostOneTaskPerImageLoopUnroll2(int const images, int const innerTasksPixels) {
-	std::vector<std::future<int>> tasks;
-	std::string const prefix{ "u2" };
-
-	// one thread foreach image
-	for (auto i{ 0 }; i < images; ++i) {
-		tasks.emplace_back(std::async(std::launch::async, &calcAsyncFunctionLoopUnroll2, point_x, point_y, i + 1, ITERATIONS, std::ref(prefix), innerTasksPixels));
-	}
-
-	// wait for all points
-	for (int i = 0; i < images; ++i) {
-		tasks[i].wait();
-	}
-}
-
-
-int calculateOnDevice(float const& point_x, float const& point_y, int const current_iteration, int const iterations, float const& pixel_per_thread) {
-	auto zoom_factor{ 1.0f };
-	// calculate zoom_factor
-	for (auto i{ 1 }; i < current_iteration; ++i) {
+	for (auto i{ 0 }; i < current_iteration; ++i) {
 		zoom_factor *= ZOOM_FACTOR;
 	}
 	// set field of view
@@ -265,7 +96,7 @@ int calculateOnDevice(float const& point_x, float const& point_y, int const curr
 	// target host
 	pfc::bitmap const bmp{ WIDTH, HEIGHT };
 	//bmp.pixel_span().data()
-	auto s{ bmp.pixel_span().begin() };
+	auto data{ bmp.pixel_span().data() };
 	auto hp_destination{ std::make_unique<pfc::byte_t[]>(memory_size) };
 
 	// target device
@@ -282,19 +113,20 @@ int calculateOnDevice(float const& point_x, float const& point_y, int const curr
 	gpuErrchk(cudaFree(dp_destination));
 	// copy to bmp
 	for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
-		*s = { 0, 0, hp_destination[i] };
-		++s;
+		data[i] = { 0, 0, hp_destination[i] };
 	}
 	// store test image
-	//bmp.to_file("./gpu_iter_" + std::to_string(current_iteration) + ".bmp");
+#ifdef STOREIMAGES
+	bmp.to_file("../img/gpu_iter_" + std::to_string(current_iteration + 1) + ".bmp");
+#endif // STOREIMAGES
 
 	return 0;
 }
 
-int calculateOnDeviceWholeBitmap(float const& point_x, float const& point_y, int const current_iteration, int const iterations, float const& pixel_per_thread) {
+int calculateOnDeviceBitmap(int const current_iteration) {
 	auto zoom_factor{ 1.0f };
 	// calculate zoom_factor
-	for (auto i{ 1 }; i < current_iteration; ++i) {
+	for (auto i{ 0 }; i < current_iteration; ++i) {
 		zoom_factor *= ZOOM_FACTOR;
 	}
 	// set field of view
@@ -320,109 +152,207 @@ int calculateOnDeviceWholeBitmap(float const& point_x, float const& point_y, int
 
 	gpuErrchk(cudaFree(dp_destination));
 	// store test image
-	//bmp.to_file("./gpu_whbi_" + std::to_string(current_iteration) + ".bmp");
-
+#ifdef STOREIMAGES
+	bmp.to_file("../img/gpu_byte_" + std::to_string(current_iteration + 1) + ".bmp");
+#endif // STOREIMAGES
 	return 0;
 }
 
-void runOnDevice(int const images, float const& pixel_per_thread) {
-	std::vector<std::future<int>> tasks;
-	std::string const prefix{ "ur" };
+// CPU functions
+void global_sequential_local_sequential(int const images) {
 
-	// one task for each image
-	for (auto i{ 0 }; i < images; ++i) {
-		tasks.emplace_back(std::async(std::launch::async, &calculateOnDevice, point_x, point_y, i + 1, ITERATIONS, pixel_per_thread));
-	}
-
-	// wait for completion
-	for (int i = 0; i < images; ++i) {
-		tasks[i].wait();
-	}
-}
-
-void runOnDeviceWholeBitmap(int const images, float const& pixel_per_thread) {
-	std::vector<std::future<int>> tasks;
-	std::string const prefix{ "ur" };
-
-	// one task for each image
-	for (auto i{ 0 }; i < images; ++i) {
-		tasks.emplace_back(std::async(std::launch::async, &calculateOnDeviceWholeBitmap, point_x, point_y, i + 1, ITERATIONS, pixel_per_thread));
-	}
-
-	// wait for completion
-	for (int i = 0; i < images; ++i) {
-		tasks[i].wait();
-	}
-}
-
-void global_parallel_local_parallel(int const images, int const inner_size) {
-	// one thread per image
-	pfc::parallel_range(true, images, images, [inner_size](int outerIdx, int begin, int end) {
+	for (auto o{ 0 }; o < images; ++o)
+	{
 		pfc::bitmap const bmp{ WIDTH, HEIGHT };
+		auto data{ bmp.pixel_span().data() };
 
-		// calculate zoom_factor
-		auto zoom_factor{ 1.0f };
-		for (auto i{ 1 }; i < outerIdx; ++i) {
-			zoom_factor *= ZOOM_FACTOR;
+		// foreach pixel in image
+		for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
+			data[i] = { 0, 0, valueHost(X_VAL[i], Y_VAL[i], CX_MIN[o], CY_MIN[o], CX_MAX[o], CY_MAX[o], ITERATIONS) };
 		}
+#ifdef STOREIMAGES
+		bmp.to_file("../img/cpu_gs_ls" + std::to_string(o + 1) + ".bmp");
+#endif // STOREIMAGES
+	}
+}
 
-		// set field of view / Zoom in
-		auto const cx_min{ point_x + cx_min_factor * zoom_factor };
-		auto const cx_max{ point_x + cx_max_factor * zoom_factor };
-		auto const cy_min{ point_y + cy_min_factor * zoom_factor };
-		auto const cy_max{ point_y + cy_max_factor * zoom_factor };
+void global_parallel_local_sequential(int const images, int const outer_size) {
+	// one thread per image
+	pfc::parallel_range(true, outer_size, images, [](int outerIdx, int begin, int end) {
+		pfc::bitmap const bmp{ WIDTH, HEIGHT };
+		auto data{ bmp.pixel_span().data() };
 
-		// one task calcualtes inner_size pixels
-		pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [bmp, cx_min, cx_max, cy_min, cy_max](int innerIdx, int begin, int end) {
-			// get the current line in the image
-			auto y{ begin / WIDTH };
-			// advance to the current starting pixel
-			auto s{ bmp.pixel_span().begin() };
-			std::advance(s, begin);
-			// copy at thread position if the position is valid
-			if (begin < end) {
-				for (auto i{ begin }; i < end; ++i) {
-					*s = { 0, 0, valueDevice(i, y, cx_min, cy_min, cx_max, cy_max, ITERATIONS) };
-					++s;
-				}
-			}
-			});
-
-		bmp.to_file("./cpu_gp_lp" + std::to_string(outerIdx) + ".bmp");
+		// foreach pixel in image
+		for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
+			data[i] = { 0, 0, valueHost(X_VAL[i], Y_VAL[i], CX_MIN[outerIdx], CY_MIN[outerIdx], CX_MAX[outerIdx], CY_MAX[outerIdx], ITERATIONS) };
+		}
+#ifdef STOREIMAGES
+		bmp.to_file("../img/cpu_gp_ls" + std::to_string(outerIdx + 1) + ".bmp");
+#endif // STOREIMAGES
 		});
 }
 
-void global_parallel_local_sequential(int const images) {
+void global_parallel_local_parallel(int const images, int const inner_size, int const outer_size) {
 	// one thread per image
-	pfc::parallel_range(true, images, images, [](int outerIdx, int begin, int end) {
-		pfc::bitmap const bmp{ WIDTH, HEIGHT };
+	pfc::parallel_range(true, outer_size, images, [inner_size](int thread_idx, int begin, int end) {
+		// o = outer
+		// i = inner
+		for (auto o{ begin }; o < end; ++o) {
+			pfc::bitmap const bmp{ WIDTH, HEIGHT };
+			auto data{ bmp.pixel_span().data() };
 
-		// calculate zoom_factor
-		auto zoom_factor{ 1.0f };
-		for (auto i{ 1 }; i < outerIdx; ++i) {
-			zoom_factor *= ZOOM_FACTOR;
+			// foreach pixel in image
+			pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
+				for (auto i{ begin }; i < end; ++i) {
+					data[i] = { 0, 0, valueHost(X_VAL[i], Y_VAL[i], CX_MIN[o], CY_MIN[o], CX_MAX[o], CY_MAX[o], ITERATIONS) };
+				}
+				});
+#ifdef STOREIMAGES
+			bmp.to_file("../img/cpu_gp_lp" + std::to_string(o + 1) + ".bmp");
+#endif // STOREIMAGES
 		}
-
-		// set field of view / Zoom in
-		auto const cx_min{ point_x + cx_min_factor * zoom_factor };
-		auto const cx_max{ point_x + cx_max_factor * zoom_factor };
-		auto const cy_min{ point_y + cy_min_factor * zoom_factor };
-		auto const cy_max{ point_y + cy_max_factor * zoom_factor };
-
-		// advance to the current starting pixel
-		auto s{ bmp.pixel_span().begin() };
-	
-		// foreach pixel in image
-		for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
-			auto x{ i % WIDTH };
-			auto y{ i / WIDTH };
-
-			*s = { 0, 0, valueDevice(x, y, cx_min, cy_min, cx_max, cy_max, ITERATIONS) };
-			++s;
-		}
-		
-		bmp.to_file("./cpu_gp_ls" + std::to_string(outerIdx) + ".bmp");
 	});
+}
+
+void global_parallel_local_parallel_v2(int const images, int const inner_size, int const outer_size) {
+	// one thread per image
+	pfc::parallel_range(true, outer_size, images, [inner_size](int thread_idx, int begin, int end) {
+		// o = outer
+		// i = inner
+		for (auto o{ begin }; o < end; ++o) {
+			pfc::bitmap const bmp{ WIDTH, HEIGHT };
+			auto data{ bmp.pixel_span().data() };
+
+			// foreach pixel in image
+			pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
+				for (auto i{ begin }; i < end; ++i) {
+					data[i] = { 0, 0, valueHost_opt(i, o) };
+				}
+				});
+#ifdef STOREIMAGES
+			bmp.to_file("../img/cpu_gp_lp_v2" + std::to_string(o + 1) + ".bmp");
+#endif // STOREIMAGES
+		}
+		});
+}
+
+void global_sequential_local_prallel(int const images, int const inner_size) {
+	// one thread per image
+	for (auto o{ 0 }; o < images; ++o)
+	{
+		pfc::bitmap const bmp{ WIDTH, HEIGHT };
+		auto data{ bmp.pixel_span().data() };
+
+		// foreach pixel in image
+		pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
+			for (auto i{ begin }; i < end; ++i) {
+				data[i] = { 0, 0, valueHost(X_VAL[i], Y_VAL[i], CX_MIN[o], CY_MIN[o], CX_MAX[o], CY_MAX[o], ITERATIONS) };
+			}
+		});
+#ifdef STOREIMAGES
+		bmp.to_file("../img/cpu_gs_lp" + std::to_string(o + 1) + ".bmp");
+#endif // STOREIMAGES
+	}
+}
+
+// GPU functions
+void sequential_gpu_byte(int const images) {
+	// one thread per image
+	for (auto o{ 0 }; o < images; ++o)
+	{	
+		calculateOnDevice(o);
+	}
+}
+
+void sequential_gpu_bitmap(int const images) {
+	// one thread per image
+	for (auto o{ 0 }; o < images; ++o)
+	{
+		calculateOnDeviceBitmap(o);
+	}
+}
+
+void parallel_gpu_byte_all(int const images) {
+	// one thread per image
+	pfc::parallel_range(true, images, images, [](int o, int begin, int end) {
+		calculateOnDevice(o);
+	});
+}
+
+void parallel_gpu_byte_all_opt(int const images) {
+	// one thread per image
+	pfc::parallel_range(true, images, images, [](int o, int begin, int end) {
+		calculateOnDevice_opt_v1(o);
+	});
+}
+
+void parallel_gpu_bitmap_all(int const images) {
+	// one thread per image
+	pfc::parallel_range(true, images, images, [](int o, int begin, int end) {
+		calculateOnDeviceBitmap(o);
+	});
+}
+
+void parallel_gpu_bitmap_chunked(int const images, int const chunk_size) {
+	// one thread per image
+	pfc::parallel_range(true, chunk_size, images, [](int o, int begin, int end) {
+		for (auto i{ begin }; i < end; ++i) {
+			calculateOnDeviceBitmap(i);
+		}
+	});
+}
+
+void parallel_gpu_byte_chunked(int const images, int const chunk_size) {
+	// one thread per image
+	pfc::parallel_range(true, chunk_size, images, [](int o, int begin, int end) {
+		for (auto i{ begin }; i < end; ++i)
+			calculateOnDevice(i);
+		});
+}
+
+void precalculateIndices() {
+	for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
+		auto x{ i % WIDTH };
+		auto y{ i / WIDTH };
+
+		X_VAL.emplace_back(x);
+		Y_VAL.emplace_back(y);
+	}
+}
+
+void fileWrite() {
+	std::ofstream cx_minf("cx_min.txt");
+	std::ofstream cy_minf("cy_min.txt");
+	std::ofstream cx_maxf("cx_max.txt");
+	std::ofstream cy_maxf("cy_max.txt");
+	if (cx_minf.is_open() && cy_minf.is_open() && cx_maxf.is_open() && cy_maxf.is_open())
+	{
+		cy_maxf << "{";
+		cx_maxf << "{";
+		cy_minf << "{";
+		cx_minf << "{";
+		bool init{ true };
+
+		for each (auto const factor in ZOOM_FACTORS)
+		{
+			cx_minf << (!init ? ", " : "") << (point_x + cx_min_factor * factor);
+			cy_minf << (!init ? ", " : "") << (point_y + cy_min_factor * factor);
+			cx_maxf << (!init ? ", " : "") << (point_x + cx_max_factor * factor);
+			cy_maxf << (!init ? ", " : "") << (point_y + cy_max_factor * factor);
+
+			init = false;
+		}
+		cy_maxf << "};";
+		cx_maxf << "};";
+		cy_minf << "};";
+		cx_minf << "};";
+
+
+		cy_maxf.close();
+		cx_maxf.close();
+		cy_minf.close();
+		cx_minf.close();
+	}
 }
 
 int main() {
@@ -431,16 +361,12 @@ int main() {
 		std::cout << "!!!!!!!!!! FAILED, no device found !!!!!!!!!!" << std::endl;
 	}
 
-	std::vector<float> zoom_factor;
-	auto factor{ ZOOM_FACTOR };
+	auto const images{ 200 };
+	auto const cores{ 8 };
+	auto const work_per_core{ images / cores };
+	auto const chunk_size_bitmap{ 50 }; // 70 sometimes out of memory
 
-	for (auto i{ 0 }; i < 200; ++i) {
-		zoom_factor.push_back(factor);
-		factor *= ZOOM_FACTOR;
-	}
-
-
-	auto images{ 1 };
+	precalculateIndices();
 
 	//printResult(measureTime(runOnHostOneTaskPerImageLoopUnroll2, images, 1024),
 	//	measureTime(runOnHostOneTaskPerImageLoopUnroll2, images, WIDTH), "CPU LUR 1024", "CPU LUR WIDTH", images);
@@ -457,23 +383,30 @@ int main() {
 
 
 	//printResult(200,
-	//	measureTime(global_parallel_local_parallel, images, WIDTH), "", "CPU GP_LP", images);	
-	
-	
+	//	measureTime(global_parallel_local_parallel, images, WIDTH, images), "", "CPU GP_LP", images);	
+
+
 	//printResult(200,
 	//	measureTime(global_parallel_local_sequential, images), "", "CPU GP_LS", images);
 
+	//printResult(200,
+	//	measureTime(global_sequential_local_prallel, images, WIDTH), "", "CPU GS_LP", images);
 
-
-	//measureTime(runOnHostOneThreadPerImagePfc, 1);
-
-	//measureTime(runOnDeviceWholeBitmap, images, 0);
-
-	//pfc::parallel_range_task(2, 2, [](int idx, int begin, int end) {
-	//	std::cout << idx << ", " << begin << ", " << end << " ";
-	//	});
-
-
+	//printResult(measureTime(global_parallel_local_sequential, images),
+	//	measureTime(global_parallel_local_parallel, images, WIDTH, images), "CPU GP_LS", "CPU GP_LP", images);	
+	
+	//printResult(measureTime(global_parallel_local_parallel, images, WIDTH / 4, images),
+	//	measureTime(global_parallel_local_parallel, images, WIDTH / 2, work_per_core), "CPU imgs", "CPU 8 core", images);		
+	
+	//printResult(measureTime(global_parallel_local_parallel_v2, images, WIDTH / 2, work_per_core),
+	//	measureTime(global_parallel_local_parallel, images, WIDTH / 2, work_per_core), "CPU 8 opt", "CPU 8 no opt", images);	
+	
+	//printResult(measureTime(parallel_gpu_byte_all, images),
+	//	measureTime(parallel_gpu_bitmap_chunked, images, chunk_size_bitmap), "GPU Byte all", "GPU Bitmap chunked", images);	
+	
+	
+	printResult(100,
+		measureTime(parallel_gpu_byte_all_opt, images), "GPU Byte no opt", "GPU Byte opt", images);
 
 	return 0;
 }

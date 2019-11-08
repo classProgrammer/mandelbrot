@@ -42,6 +42,22 @@ __global__ void mandel_kernel2(pfc::BGR_4_t* dest, int size,
 	}
 }
 
+__global__ void mandel_kernel3(pfc::byte_t* dest, int size, int const outer_idx) {
+	// threads are always generated in groups of 32 => pay attention on idx
+
+	// all threads are here at the same time => parallel
+	//auto t{ blockIdx.x * blockDim.x + threadIdx.x }; // absolute thread idx
+
+	auto const thread_index{ (blockIdx.x * blockDim.x + threadIdx.x) };// start at position x
+
+	// copy at thread position if the position is valid
+	if (thread_index < size) {
+		auto x{ thread_index % WIDTH };
+		auto y{ thread_index / WIDTH };
+		dest[thread_index] = valueDevice2(x, y, outer_idx);
+	}
+}
+
 // delegeate params from host -> device
 void call_mandel_kernel(dim3 const& big, dim3 const& tib, pfc::byte_t* dest, int const size,
 	float const& cx_min, float const& cx_max, float const& cy_min, float const& cy_max) {
@@ -55,3 +71,7 @@ void call_mandel_kernel2(dim3 const& big, dim3 const& tib, pfc::BGR_4_t* dest, i
 	mandel_kernel2 << <big, tib >> > (dest, size, cx_min, cx_max, cy_min, cy_max);
 }
 
+void call_mandel_kernel3(dim3 const& big, dim3 const& tib, pfc::byte_t* dest, int const size, int const outer_idx) {
+	// <<<>>> = kernel configuration, run with big many blocks with tib many threads in each block
+	mandel_kernel3 << <big, tib >> > (dest, size, outer_idx);
+}
