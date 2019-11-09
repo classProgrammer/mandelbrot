@@ -88,13 +88,16 @@
   <ItemGroup>
     <ClCompile Include="mandelbrot.cpp" />
     <ClCompile Include="mandelbrotutil.cpp" />
+    <ClCompile Include="mandel_cpu.cpp" />
     <ClCompile Include="pfc_complex.h" />
     <ClCompile Include="pfc_threading.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="mandel_constants.h" />
     <ClInclude Include="kernel.cuh" />
     <ClInclude Include="mandelbrot.h" />
     <ClInclude Include="mandelbrotutil.h" />
+    <ClInclude Include="mandel_cpu.h" />
     <ClInclude Include="pfc_random.h" />
     <ClInclude Include="pfc_base.h" />
     <ClInclude Include="pfc_bitmap_3.h" />

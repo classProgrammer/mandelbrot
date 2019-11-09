@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <complex>
-#include <fstream> // for files manipulation
-#include <complex> // for complex numbers
+#include <fstream> 
+#include <complex>
 #include "pfc_types.h"
 #include "pfc_bitmap_3.h"
 #include <string_view>
@@ -15,7 +15,7 @@
 #include <vector>
 
 // define to store the bmp files
-#define STOREIMAGES
+//#define STOREIMAGES
 
 // precalculated indices for value mapping
 std::vector<int> X_VAL;
@@ -24,8 +24,8 @@ std::vector<int> Y_VAL;
 pfc::byte_t valueHost_opt(int const inner_idx, int const outer_index) {
 	// calculate the constant
 	pfc::complex<float> c(
-		(CX_MIN[outer_index] + X_VAL[inner_idx] / (WIDTH_FACTOR) * (CX_MAX[outer_index] - CX_MIN[outer_index])),
-		(CY_MIN[outer_index] + Y_VAL[inner_idx] / (HEIGHT_FACTOR) * (CY_MAX[outer_index] - CY_MIN[outer_index]))
+		(CX_MIN[outer_index] + X_VAL[inner_idx] / WIDTH_FACTOR * (CX_MAX[outer_index] - CX_MIN[outer_index])),
+		(CY_MIN[outer_index] + Y_VAL[inner_idx] / HEIGHT_FACTOR * (CY_MAX[outer_index] - CY_MIN[outer_index]))
 	);
 	// initialize z
 	pfc::complex<float> z(0.0f, 0.0f);
@@ -37,6 +37,24 @@ pfc::byte_t valueHost_opt(int const inner_idx, int const outer_index) {
 	// set color gradient
 	return iterations < ITERATIONS ? COLORS[iterations] : 0;
 }
+
+pfc::byte_t valueHost_opt_v2(int const inner_idx, int const outer_index) {
+	// calculate the constant
+	pfc::complex<float> c(
+		(X_VAL[inner_idx] * X_FACTORS[outer_index] + CX_MIN[outer_index]),
+		(Y_VAL[inner_idx] * Y_FACTORS[outer_index] + CY_MIN[outer_index])
+	);
+	// initialize z
+	pfc::complex<float> z(0.0f, 0.0f);
+	auto iterations{ 0 };
+	// calculate z
+	while (z.norm() < 4 && iterations++ < ITERATIONS) {
+		z = z.square() + c;
+	}
+	// set color gradient
+	return iterations < ITERATIONS ? COLORS[iterations] : 0;
+}
+
 // TODO:
 // CPU threads vs task with param settings when is what better
 // try to be creative with paralelism on CPU, e.g. 4 parallel images which are calculated parallel
@@ -236,6 +254,29 @@ void global_parallel_local_parallel_v2(int const images, int const inner_size, i
 		});
 }
 
+
+void global_parallel_local_parallel_v3(int const images, int const inner_size, int const outer_size) {
+	// one thread per image
+	pfc::parallel_range(true, outer_size, images, [inner_size](int thread_idx, int begin, int end) {
+		// o = outer
+		// i = inner
+		for (auto o{ begin }; o < end; ++o) {
+			pfc::bitmap const bmp{ WIDTH, HEIGHT };
+			auto data{ bmp.pixel_span().data() };
+
+			// foreach pixel in image
+			pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
+				for (auto i{ begin }; i < end; ++i) {
+					data[i] = { 0, 0, valueHost_opt_v2(i, o) };
+				}
+				});
+#ifdef STOREIMAGES
+			bmp.to_file("../img/cpu_gp_lp_v3" + std::to_string(o + 1) + ".bmp");
+#endif // STOREIMAGES
+		}
+		});
+}
+
 void global_sequential_local_prallel(int const images, int const inner_size) {
 	// one thread per image
 	for (auto o{ 0 }; o < images; ++o)
@@ -355,18 +396,53 @@ void fileWrite() {
 	}
 }
 
+//(cx_min + x / (WIDTH_FACTOR) * (cx_max - cx_min)),
+//(cy_min + y / (HEIGHT_FACTOR) * (cy_max - cy_min))
+
+void factorWrite() {
+	std::ofstream cx_f("cx_f.txt");
+	std::ofstream cy_f("cy_f.txt");
+
+	if (cx_f.is_open() && cy_f.is_open())
+	{
+		cx_f << "{";
+		cy_f << "{";
+
+		bool init{ true };
+
+		for (int i{0}; i < (sizeof(CX_MAX) / sizeof(float)); ++i)
+		{
+			cx_f << (!init ? ", " : "") << ((CX_MAX[i] - CX_MIN[i]) / WIDTH_FACTOR);
+			cy_f << (!init ? ", " : "") << ((CY_MAX[i] - CY_MIN[i]) / HEIGHT_FACTOR);
+
+			init = false;
+		}
+		cx_f << "};";
+		cy_f << "};";
+
+		cx_f.close();
+		cy_f.close();
+	}
+}
+
+
+
+
+
 int main() {
 
 	if (!foundDevice()) {
 		std::cout << "!!!!!!!!!! FAILED, no device found !!!!!!!!!!" << std::endl;
 	}
 
-	auto const images{ 200 };
+	auto const images{ 20 };
 	auto const cores{ 8 };
 	auto const work_per_core{ images / cores };
 	auto const chunk_size_bitmap{ 50 }; // 70 sometimes out of memory
 
 	precalculateIndices();
+
+	//factorWrite();
 
 	//printResult(measureTime(runOnHostOneTaskPerImageLoopUnroll2, images, 1024),
 	//	measureTime(runOnHostOneTaskPerImageLoopUnroll2, images, WIDTH), "CPU LUR 1024", "CPU LUR WIDTH", images);
@@ -405,8 +481,11 @@ int main() {
 	//	measureTime(parallel_gpu_bitmap_chunked, images, chunk_size_bitmap), "GPU Byte all", "GPU Bitmap chunked", images);	
 	
 	
-	printResult(100,
-		measureTime(parallel_gpu_byte_all_opt, images), "GPU Byte no opt", "GPU Byte opt", images);
+	printResult(measureTime(global_parallel_local_parallel_v2, images, WIDTH / 4, work_per_core),
+		measureTime(global_parallel_local_parallel_v3, images, WIDTH / 4, work_per_core), "CPU opt v1", "CPU opt v2", images);	
+
+	//printResult(100,
+	//	measureTime(parallel_gpu_byte_all_opt, images), "GPU Byte no opt", "GPU Byte opt", images);
 
 	return 0;
 }
