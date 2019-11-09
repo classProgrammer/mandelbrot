@@ -15,11 +15,28 @@
 #include <vector>
 
 // define to store the bmp files
-//#define STOREIMAGES
+#define STOREIMAGES
 
 // precalculated indices for value mapping
 std::vector<int> X_VAL;
 std::vector<int> Y_VAL;
+
+pfc::byte_t valueHost(int const x, int const y, float const& cx_min, float const& cy_min, float const& cx_max, float const& cy_max, int const max_iterations) {
+	// calculate the constant
+	pfc::complex<float> c(
+		(cx_min + x / (WIDTH_FACTOR) * (cx_max - cx_min)),
+		(cy_min + y / (HEIGHT_FACTOR) * (cy_max - cy_min))
+	);
+	// initialize z
+	pfc::complex<float> z(0.0f, 0.0f);
+	auto iterations{ 0 };
+	// calculate z
+	while (z.norm() < 4 && iterations++ < max_iterations) {
+		z = z.square() + c;
+	}
+	// set color gradient
+	return iterations < max_iterations ? COLORS[iterations] : 0;
+}
 
 pfc::byte_t valueHost_opt(int const inner_idx, int const outer_index) {
 	// calculate the constant
@@ -435,7 +452,7 @@ int main() {
 		std::cout << "!!!!!!!!!! FAILED, no device found !!!!!!!!!!" << std::endl;
 	}
 
-	auto const images{ 20 };
+	auto const images{ 10 };
 	auto const cores{ 8 };
 	auto const work_per_core{ images / cores };
 	auto const chunk_size_bitmap{ 50 }; // 70 sometimes out of memory
