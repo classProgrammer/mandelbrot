@@ -2,8 +2,8 @@
 #include <thread>
 #include <chrono>
 #include "kernel.cuh"
-#include "mandelbrot.h"
 #include "mandelbrotutil.h"
+#include "mandel_constants_gpu.h"
 
 void printBlock(int const no_of_images, float const data, float const mib, float const& time, std::string const& label) {
 	std::cout <<

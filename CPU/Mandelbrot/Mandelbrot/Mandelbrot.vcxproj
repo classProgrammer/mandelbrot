@@ -94,9 +94,7 @@
     <ClCompile Include="pfc_threading.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mandel_constants.h" />
     <ClInclude Include="kernel.cuh" />
-    <ClInclude Include="mandelbrot.h" />
     <ClInclude Include="mandelbrotutil.h" />
     <ClInclude Include="mandel_constants_cpu.h" />
     <ClInclude Include="mandel_constants_gpu.h" />

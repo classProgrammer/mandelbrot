@@ -1,21 +1,12 @@
 #include <cstdlib>
 #include <complex>
-#include <fstream> 
-#include <complex>
-#include "pfc_types.h"
-#include "pfc_bitmap_3.h"
-#include <string_view>
-#include <thread>
-#include <future>
-#include "mandelbrot.h"
 #include "mandelbrotutil.h"
 #include "kernel.cuh"
 #include "pfc_threading.h"
-#include <fstream>
 #include <vector>
 #include "mandel_cpu.h"
 #include "mandel_gpu.h"
-
+#include "mandel_constants_gpu.h"
 
 // TODO:
 // CPU threads vs task with param settings when is what better
@@ -25,72 +16,6 @@
 // define infinity etc. 
 // microsoft gsl
 // types.h use on device 
-
-
-void fileWrite() {
-	std::ofstream cx_minf("cx_min.txt");
-	std::ofstream cy_minf("cy_min.txt");
-	std::ofstream cx_maxf("cx_max.txt");
-	std::ofstream cy_maxf("cy_max.txt");
-	if (cx_minf.is_open() && cy_minf.is_open() && cx_maxf.is_open() && cy_maxf.is_open())
-	{
-		cy_maxf << "{";
-		cx_maxf << "{";
-		cy_minf << "{";
-		cx_minf << "{";
-		bool init{ true };
-
-		for each (auto const factor in ZOOM_FACTORS)
-		{
-			cx_minf << (!init ? ", " : "") << (point_x + cx_min_factor * factor);
-			cy_minf << (!init ? ", " : "") << (point_y + cy_min_factor * factor);
-			cx_maxf << (!init ? ", " : "") << (point_x + cx_max_factor * factor);
-			cy_maxf << (!init ? ", " : "") << (point_y + cy_max_factor * factor);
-
-			init = false;
-		}
-		cy_maxf << "};";
-		cx_maxf << "};";
-		cy_minf << "};";
-		cx_minf << "};";
-
-
-		cy_maxf.close();
-		cx_maxf.close();
-		cy_minf.close();
-		cx_minf.close();
-	}
-}
-
-//(cx_min + x / (WIDTH_FACTOR) * (cx_max - cx_min)),
-//(cy_min + y / (HEIGHT_FACTOR) * (cy_max - cy_min))
-
-void factorWrite() {
-	std::ofstream cx_f("cx_f.txt");
-	std::ofstream cy_f("cy_f.txt");
-
-	if (cx_f.is_open() && cy_f.is_open())
-	{
-		cx_f << "{";
-		cy_f << "{";
-
-		bool init{ true };
-
-		for (int i{ 0 }; i < (sizeof(CX_MAX) / sizeof(float)); ++i)
-		{
-			cx_f << (!init ? ", " : "") << ((CX_MAX[i] - CX_MIN[i]) / WIDTH_FACTOR);
-			cy_f << (!init ? ", " : "") << ((CY_MAX[i] - CY_MIN[i]) / HEIGHT_FACTOR);
-
-			init = false;
-		}
-		cx_f << "};";
-		cy_f << "};";
-
-		cx_f.close();
-		cy_f.close();
-	}
-}
-
 
 
 int main() {
