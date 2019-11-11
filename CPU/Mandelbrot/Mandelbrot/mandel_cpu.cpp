@@ -106,7 +106,7 @@ void global_sequential_local_prallel(int const images, int const inner_size) {
 	}
 }
 
-void init() {
+void init_CPU() {
 	for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 		X_VAL.emplace_back(i % WIDTH);
 		Y_VAL.emplace_back(i / WIDTH);

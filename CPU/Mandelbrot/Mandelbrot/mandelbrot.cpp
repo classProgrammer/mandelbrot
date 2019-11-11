@@ -28,7 +28,8 @@ int main() {
 	// best is 1/4 row
 	auto const BEST_INNER_SIZE{ WIDTH / 4 };
 
-	init();
+	// precalcualtes values to increase performance
+	init_CPU();
 
 	//factorWrite();
 
