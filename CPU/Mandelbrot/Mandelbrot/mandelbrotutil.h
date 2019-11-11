@@ -1,4 +1,7 @@
 #pragma once
+#include <iostream>
+#include <vector>
+#include <any>
 
 bool foundDevice();
 
@@ -15,5 +18,4 @@ float measureTime(F& func, Args&&... args) {
 	return ((float)std::chrono::duration_cast<std::chrono::milliseconds>(device_elapsed).count()) / 1000.0f;
 };
 
-void printResult(float const& host_time, float const& device_time, std::string const& label1, std::string const& label2);
-void printResult(float const& time1, float const& time2, std::string const& label1, std::string const& label2, int const no_of_images);
+void printResult(int const no_of_images, std::vector<float> const& times, std::vector<std::string> const& labels);

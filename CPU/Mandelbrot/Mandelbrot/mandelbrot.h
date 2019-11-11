@@ -45,5 +45,5 @@ pfc::byte_t valueDevice(int const x, int const y, float const& cx_min, float con
 		++iterations;
 	}
 	// set color gradient
-	return iterations < max_iterations ? 255.0 * iterations / ITERATIONS : 0;
+	return iterations < max_iterations ? 255 * iterations / ITERATIONS : 0;
 }

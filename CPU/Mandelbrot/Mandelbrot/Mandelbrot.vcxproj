@@ -97,6 +97,7 @@
     <ClInclude Include="kernel.cuh" />
     <ClInclude Include="mandelbrot.h" />
     <ClInclude Include="mandelbrotutil.h" />
+    <ClInclude Include="mandel_constants_cpu.h" />
     <ClInclude Include="mandel_cpu.h" />
     <ClInclude Include="pfc_random.h" />
     <ClInclude Include="pfc_base.h" />

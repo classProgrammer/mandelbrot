@@ -3,50 +3,71 @@
 #include <chrono>
 #include "kernel.cuh"
 #include "mandelbrot.h"
+#include "mandelbrotutil.h"
 
-using pointCollection = std::unique_ptr<float3[]>;
-using resultCollection = std::unique_ptr<int[]>;
-using timePoint = std::chrono::steady_clock::time_point;
-
-auto constexpr sizeofInt{ sizeof(int) };
-auto constexpr sizeofFloat3{ sizeof(float3) };
-
-// prints the result times and speedup for host and device
-void printResult(float const& time1, float const& time2, std::string const& label1, std::string const& label2) {
-	// calculate elapsed times and speedup
-	std::cout << label1 + " time (" << time1 << " ms) : " + label2 + " time(" << time2 << " ms)" << std::endl
-		<< "speedup: " << time1 / time2 << std::endl << (time1 < time2 ? label1 : label2) << " faster"
+void printBlock(int const no_of_images, float const data, float const mib, float const& time, std::string const& label) {
+	std::cout <<
+		"  +++++ " << label << " +++++" << std::endl <<
+		"     Runtime:    " << time << " sec (for " << no_of_images << " bitmaps and " << data << " GiB)" << std::endl <<
+		"     throughput: " << (mib * no_of_images) / time << " MiB/s"
 		<< std::endl << std::endl;
 }
 
-auto constexpr CPU{ "Intel Core i7-7700K 4.20GHz" };
-auto constexpr GPU{ "NVIDIA GTX 1080" };
+void printFastest(int const no_of_images, float const data, float const mib, float const& time, std::string const& label) {
+	std::cout <<
+		"  ++++++++ FASTEST SOLUTION ++++++++" << std::endl <<
+		"  +++++ " << label << " +++++" << std::endl <<
+		"     Runtime:    " << time << " sec (for " << no_of_images << " bitmaps and " << data << " GiB)" << std::endl <<
+		"     throughput: " << (mib * no_of_images) / time << " MiB/s"
+		<< std::endl << std::endl;
+}
 
-// prints the result times and speedup for host and device
-void printResult(float const& time1, float const& time2, std::string const& label1, std::string const& label2, int const no_of_images) {
-	// calculate elapsed times and speedup
-	auto const mib{ ((float)WIDTH * HEIGHT * 4) / 1048576.0f };
-	auto const gib{ ((float)WIDTH * HEIGHT * 4) / 1073741824.0f };
-	auto const data{ no_of_images * gib };
+void printHeader(float const& mib) {
+	auto static constexpr CPU{ "Intel Core i7-7700K 4.20GHz" };
+	auto static constexpr GPU{ "NVIDIA GTX 1080" };
 
 	std::cout <<
 		"++++++++++ RUN ++++++++++" << std::endl <<
 		"     bitmap:     " << WIDTH << " x " << HEIGHT << " pels (" << mib << " MiB)" << std::endl <<
 		"     CPU:        " << CPU << std::endl <<
-		"     GPU:        " << GPU << std::endl << std::endl <<
-		"  +++++ " << label1 << " +++++" << std::endl <<
-		"     Runtime:    " << time1 << " sec (for " << no_of_images << " bitmaps and " << data << " GiB)" << std::endl <<
-		"     throughput: " << (mib * no_of_images) / time1 << " MiB/s"
-		<< std::endl << std::endl <<
-		"  +++++ " << label2 << " +++++" << std::endl <<
-		"     Runtime:    " << time2 << " sec (for " << no_of_images << " bitmaps and " << data << " GiB)" << std::endl <<
-		"     throughput: " << (mib * no_of_images) / time2 << " MiB/s"
-		<< std::endl << std::endl <<
+		"     GPU:        " << GPU << std::endl << std::endl;
+}
+
+void printSpeedup(float const& time1, std::string const& label1, float const& time2, std::string const& label2) {
+	std::cout <<
 		"  +++++ " << "Speedup" << " +++++" << std::endl <<
 		"     Speedup:    (" << label1 << "/" << label2 << "): " << (time1 / time2) << std::endl <<
 		"     " << (time1 < time2 ? label1 : label2) << " is faster"
-		<< std::endl <<
-		"++++++++ END RUN ++++++++" << std::endl << std::endl;
+		<< std::endl << std::endl;
+}
+
+void printResult(int const no_of_images, std::vector<float> const& times, std::vector<std::string> const& labels) {
+	// calculate elapsed times and speedup
+	auto const mib{ ((float)WIDTH * HEIGHT * 4) / 1048576.0f };
+	auto const gib{ ((float)WIDTH * HEIGHT * 4) / 1073741824.0f };
+	auto const data{ no_of_images * gib };
+
+	printHeader(mib);
+
+	auto fastest{ 100000000.0f };
+	auto fastest_idx{ 0 };
+
+	for (auto i{ 0 }; i < times.size(); ++i) {
+		printBlock(no_of_images, data, mib, times[i], labels[i]);
+		if (times[i] < fastest) {
+			fastest = times[i];
+			fastest_idx = i;
+		}
+	}
+
+	for (auto i{ 0 }; i < times.size(); ++i) {
+		for (auto j{ i + 1}; j < times.size(); ++j) {
+			printSpeedup(times[i], labels[i], times[j], labels[j]);	
+		}
+	}
+
+	printFastest(no_of_images, data, mib, times[fastest_idx], labels[fastest_idx]);
+	std::cout << "++++++++ END RUN ++++++++" << std::endl << std::endl;
 }
 
 bool foundDevice() {
