@@ -89,6 +89,7 @@
     <ClCompile Include="mandelbrot.cpp" />
     <ClCompile Include="mandelbrotutil.cpp" />
     <ClCompile Include="mandel_cpu.cpp" />
+    <ClCompile Include="mandel_gpu.cpp" />
     <ClCompile Include="pfc_complex.h" />
     <ClCompile Include="pfc_threading.h" />
   </ItemGroup>
@@ -98,7 +99,9 @@
     <ClInclude Include="mandelbrot.h" />
     <ClInclude Include="mandelbrotutil.h" />
     <ClInclude Include="mandel_constants_cpu.h" />
+    <ClInclude Include="mandel_constants_gpu.h" />
     <ClInclude Include="mandel_cpu.h" />
+    <ClInclude Include="mandel_gpu.h" />
     <ClInclude Include="pfc_random.h" />
     <ClInclude Include="pfc_base.h" />
     <ClInclude Include="pfc_bitmap_3.h" />
