@@ -1,6 +1,3 @@
-#include <random>
-#include <thread>
-#include <chrono>
 #include "kernel.cuh"
 #include "mandelbrotutil.h"
 #include "mandel_constants_gpu.h"

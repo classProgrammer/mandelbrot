@@ -1,9 +1,5 @@
-#include <cstdlib>
-#include <complex>
-#include "mandelbrotutil.h"
-#include "kernel.cuh"
-#include "pfc_threading.h"
 #include <vector>
+#include "mandelbrotutil.h"
 #include "mandel_cpu.h"
 #include "mandel_gpu.h"
 #include "mandel_constants_gpu.h"
