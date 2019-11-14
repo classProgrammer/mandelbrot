@@ -20,7 +20,7 @@ int main() {
 		std::cout << "!!!!!!!!!! FAILED, no device found !!!!!!!!!!" << std::endl;
 	}
 
-	auto const images{ 16 };
+	auto const images{ 200 };
 	auto const cores{ 8 };
 	auto const WORK_PER_VIRTUAL_CORE{ images / cores };
 	auto const WORK_PER_PHYSICAL_CORE{ images / 4 };
@@ -42,7 +42,7 @@ int main() {
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, BEST_INNER_SIZE, WORK_PER_VIRTUAL_CORE));
 	//labels.emplace_back("GP_LP_1.4_task_virtual_v1");
 
-	global_parallel_local_parallel_task(images, BEST_INNER_SIZE, WORK_PER_PHYSICAL_CORE);
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task2, images, BEST_INNER_SIZE, WORK_PER_VIRTUAL_CORE));
 	//labels.emplace_back("GP_LP_1.4_task_virtual_v2");
 
 	// --------------------------------------------------
@@ -60,12 +60,24 @@ int main() {
 	//labels.emplace_back("GP_LP_W_task_virtual");
 
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 8, WORK_PER_VIRTUAL_CORE));
-	//labels.emplace_back("GP_LP_1.8W_task_virtual");
-
-	//times.emplace_back(measureTime(global_parallel_local_sequential_task, images, WORK_PER_VIRTUAL_CORE));
-	//labels.emplace_back("GP_LS_task_virtual");	
+	//labels.emplace_back("GP_LP_1.8W_task_virtual");	
+	
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 16, WORK_PER_VIRTUAL_CORE));
+	//labels.emplace_back("GP_LP_1.16W_task_virtual");
 	//
-	//// --------------------------------------------------
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 32, WORK_PER_VIRTUAL_CORE));
+	//labels.emplace_back("GP_LP_1.32W_task_virtual");	
+	//
+	times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 16, 1));
+	labels.emplace_back("GP_LP_1.16W_task_all"); // BEST SO FAR
+	
+	times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 32, 1));
+	labels.emplace_back("GP_LP_1.32W_task_all");	
+
+/*	times.emplace_back(measureTime(global_parallel_local_sequential_task, images, WORK_PER_VIRTUAL_CORE));
+	labels.emplace_back("GP_LS_task_virtual")*/;	
+	
+	// --------------------------------------------------
 
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, BEST_INNER_SIZE, WORK_PER_PHYSICAL_CORE));
 	//labels.emplace_back("GP_LP_1.4_task_physical");
@@ -85,7 +97,7 @@ int main() {
 	//times.emplace_back(measureTime(global_parallel_local_sequential_task, images, WORK_PER_PHYSICAL_CORE));
 	//labels.emplace_back("GP_LS_task_physical");
 
-	//// --------------------------------------------------
+	// --------------------------------------------------
 
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, BEST_INNER_SIZE, DUAL_CORE));
 	//labels.emplace_back("GP_LP_1.4_task_dual");
@@ -125,50 +137,11 @@ int main() {
 	//times.emplace_back(measureTime(global_parallel_local_sequential_thread, images, WORK_PER_VIRTUAL_CORE));
 	//labels.emplace_back("GP_LS_thread_virtual");
 
-	//// --------------------------------------------------
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, BEST_INNER_SIZE, WORK_PER_PHYSICAL_CORE));
-	//labels.emplace_back("GP_LP_1.4_thread_physical");
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, WIDTH / 2, WORK_PER_PHYSICAL_CORE));
-	//labels.emplace_back("GP_LP_W2_thread_physical");
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, WIDTH, WORK_PER_PHYSICAL_CORE));
-	//labels.emplace_back("GP_LP_W_thread_physical");
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, WIDTH / 8, WORK_PER_PHYSICAL_CORE));
-	//labels.emplace_back("GP_LP_W1.8_thread_physical");
-
-	//times.emplace_back(measureTime(global_parallel_local_sequential_thread, images, WORK_PER_PHYSICAL_CORE));
-	//labels.emplace_back("GP_LS_thread_physical");
-
-	//// --------------------------------------------------
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, BEST_INNER_SIZE, DUAL_CORE));
-	//labels.emplace_back("GP_LP_1.4_thread_dual");
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, WIDTH / 2, DUAL_CORE));
-	//labels.emplace_back("GP_LP_W2_thread_dual");
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, WIDTH, DUAL_CORE));
-	//labels.emplace_back("GP_LP_W_thread_dual");
-
-	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, images, WIDTH / 8, DUAL_CORE));
-	//labels.emplace_back("GP_LP_W1.8_thread_dual");
-
-	//times.emplace_back(measureTime(global_parallel_local_sequential_thread, images, DUAL_CORE));
-	//labels.emplace_back("GP_LS_thread_dual");
-
 	// --------------------------------------------------
-	
-	//times.emplace_back(measureTime(sequential_gpu_byte, images));
-	//labels.emplace_back("sequential_GPU_byte_array");	
-	//
+
 	//times.emplace_back(measureTime(sequential_gpu_bitmap, images));
 	//labels.emplace_back("sequential_GPU_bitmap");
 
-	/*times.emplace_back(measureTime(global_sequential_local_sequential, images));
-	labels.emplace_back("GS_LS");*/
 
 	printResult(images, times, labels);
 

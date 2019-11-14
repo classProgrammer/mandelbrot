@@ -1,0 +1,39 @@
+++++++++++ RUN ++++++++++
+     bitmap:     8192 x 4608 pels (144 MiB)
+     CPU:        Intel Core i7-7700K 4.20GHz
+     GPU:        NVIDIA GTX 1080
+
+  +++++ GP_LP_1.4_task_virtual +++++
+     Runtime:    285.506 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 100.874 MiB/s
+
+  +++++ GP_LP_1.8W_task_virtual +++++
+     Runtime:    284.679 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 101.167 MiB/s
+
+  +++++ GP_LP_1.16W_task_virtual +++++
+     Runtime:    284.587 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 101.199 MiB/s
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.8W_task_virtual): 1.00291
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.16W_task_virtual): 1.00323
+     GP_LP_1.16W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_1.16W_task_virtual): 1.00032
+     GP_LP_1.16W_task_virtual is faster
+
+  ++++++++ FASTEST SOLUTION ++++++++
+  +++++ GP_LP_1.16W_task_virtual +++++
+     Runtime:    284.587 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 101.199 MiB/s
+
+++++++++ END RUN ++++++++
+
+
+C:\Users\GeraldSpenlingwimmer\Documents\repos\mandelbrot\CPU\Mandelbrot\x64\Release\Mandelbrot.exe (process 1233076) exited with code 0.
+Press any key to close this window . . .

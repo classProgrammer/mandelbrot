@@ -1,5 +1,6 @@
 #include "kernel.cuh"
-#include "mandelbrot.h"
+#include "mandel_gpu.h"
+#include "mandel_constants_gpu.h"
 
 // grid_dim => number of blocks in the grid
 // a grid can have x blocks 'cores'

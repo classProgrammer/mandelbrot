@@ -7,13 +7,13 @@
 
 #include "pfc_complex.h"
 // define to store the bmp files
-#define STOREIMAGES
+//#define STOREIMAGES
 
 // precalculated indices for value mapping
 std::vector<int> X_VAL;
 std::vector<int> Y_VAL;
 
-pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
+pfc::byte_t valueHost2(int const inner_idx, int const outer_index) {
 	// calculate the constant
 	pfc::complex<float> c(
 		(X_VAL[inner_idx] * X_FACTORS[outer_index] + CX_MIN[outer_index]),
@@ -30,26 +30,35 @@ pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
 	return iterations < ITERATIONS ? COLORS[iterations] : 0;
 }
 
-pfc::byte_t valueHost2(int const inner_idx, int const outer_index) {
+pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
 	// calculate the constant
 	float cr{ (X_VAL[inner_idx] * X_FACTORS[outer_index] + CX_MIN[outer_index]) }, 
 		ci{ (Y_VAL[inner_idx] * Y_FACTORS[outer_index] + CY_MIN[outer_index]) };
 	
 	// initialize z
-	float zr{ 0.0 }, zi{ 0.0 };
-	float z_norm{ 0.0 }, zr_2{ 0.0 }, zi_2{0.0};
 
-	auto iterations{ 0 };
-	// calculate z
-	while (z_norm < 4.0f && iterations++ < ITERATIONS) {
+	int iterations{ ITERATIONS };
+	float zr{ 0.0f }, 
+		zi{ 0.0f }, 
+		z_norm{ 0.0f }, 
+		zr_2{ 0.0 }, 
+		zi_2{0.0},
+		tempr{0.0},
+		tempi{ 0.0 };
+
+	while (--iterations &&  z_norm < 4.0)
+	{
+		tempr = zr_2 - zi_2 + cr;
+		tempi = zr * zi;
+
+		zi = tempi + tempi + ci;
+		zr = tempr;
+
 		zr_2 = zr * zr;
 		zi_2 = zi * zi;
 		z_norm = zr_2 + zi_2;
-
-		zi = 2.0f * zr_2 + ci;
-		zr = zr_2 - zi_2 + cr;
 	}
-	++iterations;
+	iterations = ITERATIONS - iterations;
 	// set color gradient
 	return iterations < ITERATIONS ? COLORS[iterations] : 0;
 }

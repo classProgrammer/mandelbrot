@@ -1,0 +1,195 @@
+++++++++++ RUN ++++++++++
+     bitmap:     8192 x 4608 pels (144 MiB)
+     CPU:        Intel Core i7-7700K 4.20GHz
+     GPU:        NVIDIA GTX 1080
+
+  +++++ GS_LP_1.4_task +++++
+     Runtime:    6.281 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 366.821 MiB/s
+
+  +++++ GP_LP_1.4_task_virtual +++++
+     Runtime:    6.25 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 368.64 MiB/s
+
+  +++++ GP_LS_task_virtual +++++
+     Runtime:    26.141 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 88.1374 MiB/s
+
+  +++++ GP_LP_1.4_task_physical +++++
+     Runtime:    6.251 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 368.581 MiB/s
+
+  +++++ GP_LP_W2_task_physical +++++
+     Runtime:    6.315 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 364.846 MiB/s
+
+  +++++ GP_LP_1.4_task_dual +++++
+     Runtime:    6.372 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 361.582 MiB/s
+
+  +++++ GP_LP_W2_task_dual +++++
+     Runtime:    6.424 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 358.655 MiB/s
+
+  +++++ GS_LP_1.4_thread +++++
+     Runtime:    6.94 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 331.988 MiB/s
+
+  +++++ GP_LP_1.4_thread_virtual +++++
+     Runtime:    6.917 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 333.092 MiB/s
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GP_LP_1.4_task_virtual): 1.00496
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GP_LS_task_virtual): 0.240274
+     GS_LP_1.4_task is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GP_LP_1.4_task_physical): 1.0048
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GP_LP_W2_task_physical): 0.994616
+     GS_LP_1.4_task is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GP_LP_1.4_task_dual): 0.985719
+     GS_LP_1.4_task is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GP_LP_W2_task_dual): 0.97774
+     GS_LP_1.4_task is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GS_LP_1.4_thread): 0.905043
+     GS_LP_1.4_task is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_task/GP_LP_1.4_thread_virtual): 0.908053
+     GS_LP_1.4_task is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LS_task_virtual): 0.239088
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.4_task_physical): 0.99984
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W2_task_physical): 0.989707
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.4_task_dual): 0.980854
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W2_task_dual): 0.972914
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GS_LP_1.4_thread): 0.900576
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.4_thread_virtual): 0.903571
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LS_task_virtual/GP_LP_1.4_task_physical): 4.18189
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LS_task_virtual/GP_LP_W2_task_physical): 4.13951
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LS_task_virtual/GP_LP_1.4_task_dual): 4.10248
+     GP_LP_1.4_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LS_task_virtual/GP_LP_W2_task_dual): 4.06927
+     GP_LP_W2_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LS_task_virtual/GS_LP_1.4_thread): 3.76671
+     GS_LP_1.4_thread is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LS_task_virtual/GP_LP_1.4_thread_virtual): 3.77924
+     GP_LP_1.4_thread_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_W2_task_physical): 0.989865
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_1.4_task_dual): 0.981011
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_W2_task_dual): 0.97307
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GS_LP_1.4_thread): 0.90072
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_1.4_thread_virtual): 0.903715
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_1.4_task_dual): 0.991055
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_W2_task_dual): 0.983032
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GS_LP_1.4_thread): 0.909942
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_1.4_thread_virtual): 0.912968
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_dual/GP_LP_W2_task_dual): 0.991905
+     GP_LP_1.4_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_dual/GS_LP_1.4_thread): 0.918156
+     GP_LP_1.4_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_dual/GP_LP_1.4_thread_virtual): 0.921209
+     GP_LP_1.4_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_dual/GS_LP_1.4_thread): 0.925648
+     GP_LP_W2_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_dual/GP_LP_1.4_thread_virtual): 0.928726
+     GP_LP_W2_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GS_LP_1.4_thread/GP_LP_1.4_thread_virtual): 1.00333
+     GP_LP_1.4_thread_virtual is faster
+
+  ++++++++ FASTEST SOLUTION ++++++++
+  +++++ GP_LP_1.4_task_virtual +++++
+     Runtime:    6.25 sec (for 16 bitmaps and 2.25 GiB)
+     throughput: 368.64 MiB/s
+
+++++++++ END RUN ++++++++
+
+
+C:\Users\GeraldSpenlingwimmer\Documents\repos\mandelbrot\CPU\Mandelbrot\x64\Release\Mandelbrot.exe (process 85264) exited with code 0.
+Press any key to close this window . . .

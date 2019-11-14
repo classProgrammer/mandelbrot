@@ -18,7 +18,7 @@ auto constexpr HEIGHT{ 4608 };
 //constexpr auto ZOOM_FACTOR{ 0.95f };
 // params
 
-auto constexpr ITERATIONS{ 50 };
+auto constexpr ITERATIONS{ 128 };
 //// from
 //auto constexpr cx_min_factor{ -2.0f };
 //auto constexpr cy_min_factor{ -1.125f };

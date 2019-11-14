@@ -1,0 +1,435 @@
+++++++++++ RUN ++++++++++
+     bitmap:     8192 x 4608 pels (144 MiB)
+     CPU:        Intel Core i7-7700K 4.20GHz
+     GPU:        NVIDIA GTX 1080
+
+  +++++ GP_LP_1.4_task_virtual +++++
+     Runtime:    138.682 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 207.669 MiB/s
+
+  +++++ GP_LP_W2_task_virtual +++++
+     Runtime:    139.302 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 206.745 MiB/s
+
+  +++++ GP_LP_W_task_virtual +++++
+     Runtime:    140.381 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 205.156 MiB/s
+
+  +++++ GP_LP_1.8W_task_virtual +++++
+     Runtime:    137.512 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 209.436 MiB/s
+
+  +++++ GP_LP_1.4_task_physical +++++
+     Runtime:    139.054 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 207.114 MiB/s
+
+  +++++ GP_LP_W2_task_physical +++++
+     Runtime:    139.456 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 206.517 MiB/s
+
+  +++++ GP_LP_W_task_physical +++++
+     Runtime:    141.674 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 203.284 MiB/s
+
+  +++++ GP_LP_1.8W_task_physical +++++
+     Runtime:    138.685 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 207.665 MiB/s
+
+  +++++ GP_LP_half_task_physical +++++
+     Runtime:    154.067 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 186.932 MiB/s
+
+  +++++ GP_LP_1.4_task_dual +++++
+     Runtime:    147.852 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 194.789 MiB/s
+
+  +++++ GP_LP_W2_task_dual +++++
+     Runtime:    153.713 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 187.362 MiB/s
+
+  +++++ GP_LP_W_task_dual +++++
+     Runtime:    155.985 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 184.633 MiB/s
+
+  +++++ GP_LP_1.8W_task_dual +++++
+     Runtime:    147.757 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 194.915 MiB/s
+
+  +++++ GP_LP_half_task_dual +++++
+     Runtime:    147.72 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 194.963 MiB/s
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W2_task_virtual): 0.995549
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W_task_virtual): 0.987897
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.8W_task_virtual): 1.00851
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.4_task_physical): 0.997325
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W2_task_physical): 0.99445
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W_task_physical): 0.978881
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.8W_task_physical): 0.999978
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_half_task_physical): 0.900141
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.4_task_dual): 0.937979
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W2_task_dual): 0.902214
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_W_task_dual): 0.889073
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_1.8W_task_dual): 0.938582
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_virtual/GP_LP_half_task_dual): 0.938817
+     GP_LP_1.4_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_W_task_virtual): 0.992314
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_1.8W_task_virtual): 1.01302
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_1.4_task_physical): 1.00178
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_W2_task_physical): 0.998896
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_W_task_physical): 0.983257
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_1.8W_task_physical): 1.00445
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_half_task_physical): 0.904165
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_1.4_task_dual): 0.942172
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_W2_task_dual): 0.906247
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_W_task_dual): 0.893047
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_1.8W_task_dual): 0.942778
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_virtual/GP_LP_half_task_dual): 0.943014
+     GP_LP_W2_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_1.8W_task_virtual): 1.02086
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_1.4_task_physical): 1.00954
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_W2_task_physical): 1.00663
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_W_task_physical): 0.990873
+     GP_LP_W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_1.8W_task_physical): 1.01223
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_half_task_physical): 0.911169
+     GP_LP_W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_1.4_task_dual): 0.94947
+     GP_LP_W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_W2_task_dual): 0.913267
+     GP_LP_W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_W_task_dual): 0.899965
+     GP_LP_W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_1.8W_task_dual): 0.95008
+     GP_LP_W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_virtual/GP_LP_half_task_dual): 0.950318
+     GP_LP_W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_1.4_task_physical): 0.988911
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_W2_task_physical): 0.98606
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_W_task_physical): 0.970623
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_1.8W_task_physical): 0.991542
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_half_task_physical): 0.892547
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_1.4_task_dual): 0.930065
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_W2_task_dual): 0.894602
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_W_task_dual): 0.881572
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_1.8W_task_dual): 0.930663
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_virtual/GP_LP_half_task_dual): 0.930896
+     GP_LP_1.8W_task_virtual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_W2_task_physical): 0.997117
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_W_task_physical): 0.981507
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_1.8W_task_physical): 1.00266
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_half_task_physical): 0.902555
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_1.4_task_dual): 0.940495
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_W2_task_dual): 0.904634
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_W_task_dual): 0.891457
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_1.8W_task_dual): 0.941099
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_physical/GP_LP_half_task_dual): 0.941335
+     GP_LP_1.4_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_W_task_physical): 0.984344
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_1.8W_task_physical): 1.00556
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_half_task_physical): 0.905165
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_1.4_task_dual): 0.943213
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_W2_task_dual): 0.907249
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_W_task_dual): 0.894035
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_1.8W_task_dual): 0.94382
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_physical/GP_LP_half_task_dual): 0.944056
+     GP_LP_W2_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_physical/GP_LP_1.8W_task_physical): 1.02155
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_physical/GP_LP_half_task_physical): 0.919561
+     GP_LP_W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_physical/GP_LP_1.4_task_dual): 0.958215
+     GP_LP_W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_physical/GP_LP_W2_task_dual): 0.921679
+     GP_LP_W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_physical/GP_LP_W_task_dual): 0.908254
+     GP_LP_W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_physical/GP_LP_1.8W_task_dual): 0.958831
+     GP_LP_W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_physical/GP_LP_half_task_dual): 0.959071
+     GP_LP_W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_physical/GP_LP_half_task_physical): 0.90016
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_physical/GP_LP_1.4_task_dual): 0.937999
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_physical/GP_LP_W2_task_dual): 0.902233
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_physical/GP_LP_W_task_dual): 0.889092
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_physical/GP_LP_1.8W_task_dual): 0.938602
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_physical/GP_LP_half_task_dual): 0.938837
+     GP_LP_1.8W_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_half_task_physical/GP_LP_1.4_task_dual): 1.04204
+     GP_LP_1.4_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_half_task_physical/GP_LP_W2_task_dual): 1.0023
+     GP_LP_W2_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_half_task_physical/GP_LP_W_task_dual): 0.987704
+     GP_LP_half_task_physical is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_half_task_physical/GP_LP_1.8W_task_dual): 1.04271
+     GP_LP_1.8W_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_half_task_physical/GP_LP_half_task_dual): 1.04297
+     GP_LP_half_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_dual/GP_LP_W2_task_dual): 0.961871
+     GP_LP_1.4_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_dual/GP_LP_W_task_dual): 0.94786
+     GP_LP_1.4_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_dual/GP_LP_1.8W_task_dual): 1.00064
+     GP_LP_1.8W_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.4_task_dual/GP_LP_half_task_dual): 1.00089
+     GP_LP_half_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_dual/GP_LP_W_task_dual): 0.985434
+     GP_LP_W2_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_dual/GP_LP_1.8W_task_dual): 1.04031
+     GP_LP_1.8W_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W2_task_dual/GP_LP_half_task_dual): 1.04057
+     GP_LP_half_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_dual/GP_LP_1.8W_task_dual): 1.05569
+     GP_LP_1.8W_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_W_task_dual/GP_LP_half_task_dual): 1.05595
+     GP_LP_half_task_dual is faster
+
+  +++++ Speedup +++++
+     Speedup:    (GP_LP_1.8W_task_dual/GP_LP_half_task_dual): 1.00025
+     GP_LP_half_task_dual is faster
+
+  ++++++++ FASTEST SOLUTION ++++++++
+  +++++ GP_LP_1.8W_task_virtual +++++
+     Runtime:    137.512 sec (for 200 bitmaps and 28.125 GiB)
+     throughput: 209.436 MiB/s
+
+++++++++ END RUN ++++++++
+
+
+C:\Users\GeraldSpenlingwimmer\Documents\repos\mandelbrot\CPU\Mandelbrot\x64\Release\Mandelbrot.exe (process 567516) exited with code 0.
+Press any key to close this window . . .
