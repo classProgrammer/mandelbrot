@@ -68,11 +68,11 @@ int main() {
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 32, WORK_PER_VIRTUAL_CORE));
 	//labels.emplace_back("GP_LP_1.32W_task_virtual");	
 	//
-	times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 16, 1));
-	labels.emplace_back("GP_LP_1.16W_task_all"); // BEST SO FAR
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 16, 1));
+	//labels.emplace_back("GP_LP_1.16W_task_all"); // BEST SO FAR
 	
-	times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 32, 1));
-	labels.emplace_back("GP_LP_1.32W_task_all");	
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 32, 1));
+	//labels.emplace_back("GP_LP_1.32W_task_all");	
 
 /*	times.emplace_back(measureTime(global_parallel_local_sequential_task, images, WORK_PER_VIRTUAL_CORE));
 	labels.emplace_back("GP_LS_task_virtual")*/;	
@@ -139,8 +139,11 @@ int main() {
 
 	// --------------------------------------------------
 
-	//times.emplace_back(measureTime(sequential_gpu_bitmap, images));
-	//labels.emplace_back("sequential_GPU_bitmap");
+	//times.emplace_back(measureTime(sequential_gpu_byte, images));
+	//labels.emplace_back("sequential_GPU_byte");	
+	
+	times.emplace_back(measureTime(parallel_gpu_bitmap_all_opt, images));
+	labels.emplace_back("sequential_GPU_byte");
 
 
 	printResult(images, times, labels);

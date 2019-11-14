@@ -55,7 +55,7 @@ __global__ void mandel_kernel3(pfc::byte_t* dest, int size, int const outer_idx)
 	if (thread_index < size) {
 		auto x{ thread_index % WIDTH };
 		auto y{ thread_index / WIDTH };
-		dest[thread_index] = valueDevice2(x, y, outer_idx);
+		dest[thread_index] = valueDevice3(x, y, outer_idx);
 	}
 }
 

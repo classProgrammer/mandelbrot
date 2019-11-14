@@ -8,7 +8,33 @@
 #include "mandel_gpu.h"
 
 // define to store the bmp files
-#define STOREIMAGES
+//#define STOREIMAGES
+
+int calculateOnDeviceBitmap_opt(int const current_iteration) {
+	auto const memory_size{ PIXEL_PER_IMAGE * sizeof(pfc::byte_t) };
+
+	// target host
+	pfc::bitmap const bmp{ WIDTH, HEIGHT };
+	auto hp_destination{ std::make_unique<pfc::byte_t[]>(memory_size) };
+
+	// target device
+	pfc::byte_t* dp_destination{ nullptr };
+	gpuErrchk(cudaMalloc(&dp_destination, memory_size));
+
+	call_mandel_kernel3(BLOCKS, THREADS, dp_destination, PIXEL_PER_IMAGE, current_iteration);
+
+	gpuErrchk(cudaPeekAtLastError());
+
+	// retrieve result from GPU
+	gpuErrchk(cudaMemcpy(bmp.pixel_span().data(), dp_destination, memory_size, cudaMemcpyDeviceToHost));
+
+	gpuErrchk(cudaFree(dp_destination));
+	// store test image
+#ifdef STOREIMAGES
+	bmp.to_file("../img/gpu_bitmap_opt_" + std::to_string(current_iteration + 1) + ".bmp");
+#endif // STOREIMAGES
+	return 0;
+}
 
 int calculateOnDevice_opt_v1(int const current_iteration) {
 	auto const memory_size{ PIXEL_PER_IMAGE * sizeof(pfc::byte_t) };
@@ -37,7 +63,7 @@ int calculateOnDevice_opt_v1(int const current_iteration) {
 	}
 	// store test image
 #ifdef STOREIMAGES
-	bmp.to_file("../img/gpu_opt_v1" + std::to_string(current_iteration + 1) + ".bmp");
+	bmp.to_file("../img/gpu_opt_v1_" + std::to_string(current_iteration + 1) + ".bmp");
 #endif // STOREIMAGES
 
 	return 0;
@@ -156,6 +182,13 @@ void parallel_gpu_bitmap_all(int const images) {
 	// one thread per image
 	pfc::parallel_range(true, images, images, [](int o, int begin, int end) {
 		calculateOnDeviceBitmap(o);
+		});
+}
+
+void parallel_gpu_bitmap_all_opt(int const images) {
+	// one thread per image
+	pfc::parallel_range(true, images, images, [](int o, int begin, int end) {
+		calculateOnDeviceBitmap_opt(o);
 		});
 }
 

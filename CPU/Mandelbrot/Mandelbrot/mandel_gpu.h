@@ -5,7 +5,6 @@
 #include "pfc_complex.h"
 #include "mandel_constants_gpu.h"
 
-
 // GPU functions
 void sequential_gpu_byte(int const images);
 
@@ -21,6 +20,7 @@ void parallel_gpu_bitmap_chunked(int const images, int const chunk_size);
 
 void parallel_gpu_byte_chunked(int const images, int const chunk_size);
 
+void parallel_gpu_bitmap_all_opt(int const images);
 
 __device__ __forceinline__
 pfc::byte_t valueDevice2(int const x, int const y, int const outer_index) {
@@ -37,6 +37,36 @@ pfc::byte_t valueDevice2(int const x, int const y, int const outer_index) {
 		z = z.square() + c;
 		++iterations;
 	}
+	// set color gradient
+	return iterations < ITERATIONS ? COLORS[iterations] : 0;
+}
+
+__device__ __forceinline__
+pfc::byte_t valueDevice3(int const x, int const y, int const outer_index) {
+	// calculate the constant
+	float cr{ (CX_MIN[outer_index] + x / (WIDTH_FACTOR) * (CX_MAX[outer_index] - CX_MIN[outer_index])) },
+		ci{ (CY_MIN[outer_index] + y / (HEIGHT_FACTOR) * (CY_MAX[outer_index] - CY_MIN[outer_index])) };
+
+	int iterations{ ITERATIONS };
+	float zr{ 0.0f },
+		zi{ 0.0f },
+		z_norm{ 0.0f },
+		zr_2{ 0.0 },
+		zi_2{ 0.0 },
+		tempi{ 0.0 };
+
+	while (--iterations && z_norm < 4.0)
+	{
+		tempi = zr * zi;
+
+		zi = tempi + tempi + ci;
+		zr = zr_2 - zi_2 + cr;
+
+		zr_2 = zr * zr;
+		zi_2 = zi * zi;
+		z_norm = zr_2 + zi_2;
+	}
+	iterations = ITERATIONS - iterations;
 	// set color gradient
 	return iterations < ITERATIONS ? COLORS[iterations] : 0;
 }

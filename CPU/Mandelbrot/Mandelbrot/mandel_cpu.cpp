@@ -43,16 +43,14 @@ pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
 		z_norm{ 0.0f }, 
 		zr_2{ 0.0 }, 
 		zi_2{0.0},
-		tempr{0.0},
 		tempi{ 0.0 };
 
 	while (--iterations &&  z_norm < 4.0)
 	{
-		tempr = zr_2 - zi_2 + cr;
 		tempi = zr * zi;
 
 		zi = tempi + tempi + ci;
-		zr = tempr;
+		zr = zr_2 - zi_2 + cr;
 
 		zr_2 = zr * zr;
 		zi_2 = zi * zi;
@@ -92,7 +90,7 @@ void global_parallel_local_sequential_task(int const images, int const outer_siz
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
 #ifdef STOREIMAGES
-			bmp.to_file("../img/cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
+			bmp.to_file("./cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 		}
 		});
