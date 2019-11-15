@@ -13,6 +13,8 @@
 std::vector<int> X_VAL;
 std::vector<int> Y_VAL;
 
+std::vector<pfc::bitmap> bitmaps;
+
 pfc::byte_t valueHost2(int const inner_idx, int const outer_index) {
 	// calculate the constant
 	pfc::complex<float> c(
@@ -219,8 +221,15 @@ void global_sequential_local_prallel_thread(int const images, int const inner_si
 }
 
 void init_CPU() {
+
+	static const int max_images{ 200 };
+
 	for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 		X_VAL.emplace_back(i % WIDTH);
 		Y_VAL.emplace_back(i / WIDTH);
+	}
+
+	for (auto i{ 0 }; i < max_images; ++i) {
+		bitmaps.emplace_back(pfc::bitmap{ WIDTH, HEIGHT });
 	}
 }
