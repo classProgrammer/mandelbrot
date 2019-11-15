@@ -20,7 +20,7 @@ int main() {
 		std::cout << "!!!!!!!!!! FAILED, no device found !!!!!!!!!!" << std::endl;
 	}
 
-	auto const images{ 200 };
+	auto const images{ 10 };
 	auto const cores{ 8 };
 	auto const WORK_PER_VIRTUAL_CORE{ images / cores };
 	auto const WORK_PER_PHYSICAL_CORE{ images / 4 };
@@ -62,8 +62,8 @@ int main() {
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 8, WORK_PER_VIRTUAL_CORE));
 	//labels.emplace_back("GP_LP_1.8W_task_virtual");	
 	
-	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 16, WORK_PER_VIRTUAL_CORE));
-	//labels.emplace_back("GP_LP_1.16W_task_virtual");
+	times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 16, WORK_PER_VIRTUAL_CORE));
+	labels.emplace_back("GP_LP_1.16W_task_virtual");
 	//
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH / 32, WORK_PER_VIRTUAL_CORE));
 	//labels.emplace_back("GP_LP_1.32W_task_virtual");	
@@ -142,8 +142,8 @@ int main() {
 	//times.emplace_back(measureTime(sequential_gpu_byte, images));
 	//labels.emplace_back("sequential_GPU_byte");	
 	
-	times.emplace_back(measureTime(parallel_gpu_bitmap_all_opt, images));
-	labels.emplace_back("sequential_GPU_byte");
+	//times.emplace_back(measureTime(parallel_gpu_bitmap_all_opt, images));
+	//labels.emplace_back("sequential_GPU_byte");
 
 
 	printResult(images, times, labels);

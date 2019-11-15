@@ -73,7 +73,7 @@ void global_sequential_local_sequential(int const images) {
 			data[i] = { 0, 0, valueHost(i, o) };
 		}
 #ifdef STOREIMAGES
-		bmp.to_file("../img/cpu_gs_ls_" + std::to_string(o + 1) + ".bmp");
+		bitmaps[o].to_file("../img/cpu_gs_ls_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 	}
 }
@@ -88,7 +88,7 @@ void global_parallel_local_sequential_task(int const images, int const outer_siz
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
 #ifdef STOREIMAGES
-			bmp.to_file("./cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
+			bitmaps[o].to_file("./cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 		}
 		});
@@ -106,7 +106,7 @@ void global_parallel_local_parallel_task(int const images, int const inner_size,
 				}
 				});
 #ifdef STOREIMAGES
-			bmp.to_file("../img/cpu_gp_lp_" + std::to_string(o + 1) + ".bmp");
+			bitmaps[o].to_file("../img/cpu_gp_lp_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 		}
 		});
@@ -124,7 +124,7 @@ void global_parallel_local_parallel_task2(int const images, int const inner_size
 				}
 				});
 #ifdef STOREIMAGES
-			bmp.to_file("../img/cpu_gp_lp2_" + std::to_string(o + 1) + ".bmp");
+			bitmaps[o].to_file("../img/cpu_gp_lp2_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 		}
 		});
@@ -141,7 +141,7 @@ void global_sequential_local_prallel_task(int const images, int const inner_size
 			}
 			});
 #ifdef STOREIMAGES
-		bmp.to_file("../img/cpu_gs_lp_" + std::to_string(o + 1) + ".bmp");
+		bitmaps[o].to_file("../img/cpu_gs_lp_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 	}
 }
@@ -156,7 +156,7 @@ void global_parallel_local_sequential_thread(int const images, int const outer_s
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
 #ifdef STOREIMAGES
-			bmp.to_file("../img/cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
+			bitmaps[o].to_file("../img/cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 		}
 		});
@@ -175,7 +175,7 @@ void global_parallel_local_parallel_thread(int const images, int const inner_siz
 				}
 				});
 #ifdef STOREIMAGES
-			bmp.to_file("../img/cpu_gp_lp_" + std::to_string(o + 1) + ".bmp");
+			bitmaps[o].to_file("../img/cpu_gp_lp_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 		}
 		});
@@ -192,7 +192,7 @@ void global_sequential_local_prallel_thread(int const images, int const inner_si
 			}
 			});
 #ifdef STOREIMAGES
-		bmp.to_file("../img/cpu_gs_lp_" + std::to_string(o + 1) + ".bmp");
+		bitmaps[o].to_file("../img/cpu_gs_lp_" + std::to_string(o + 1) + ".bmp");
 #endif // STOREIMAGES
 	}
 }
