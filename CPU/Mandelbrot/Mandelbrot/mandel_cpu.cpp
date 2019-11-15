@@ -6,31 +6,12 @@
 #include <vector>
 
 #include "pfc_complex.h"
-// define to store the bmp files
-//#define STOREIMAGES
 
 // precalculated indices for value mapping
 std::vector<int> X_VAL;
 std::vector<int> Y_VAL;
 
 std::vector<pfc::bitmap> bitmaps;
-
-pfc::byte_t valueHost2(int const inner_idx, int const outer_index) {
-	// calculate the constant
-	pfc::complex<float> c(
-		(X_VAL[inner_idx] * X_FACTORS[outer_index] + CX_MIN[outer_index]),
-		(Y_VAL[inner_idx] * Y_FACTORS[outer_index] + CY_MIN[outer_index])
-	);
-	// initialize z
-	pfc::complex<float> z(0.0f, 0.0f);
-	auto iterations{ 0 };
-	// calculate z
-	while (z.norm() < 4.0f && iterations++ < ITERATIONS) {
-		z = z.square() + c;
-	}
-	// set color gradient
-	return iterations < ITERATIONS ? COLORS[iterations] : 0;
-}
 
 pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
 	// calculate the constant
@@ -39,19 +20,18 @@ pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
 	
 	// initialize z
 
-	int iterations{ ITERATIONS };
-	float zr{ 0.0f }, 
+	auto iterations{ ITERATIONS };
+	auto zr{ 0.0f }, 
 		zi{ 0.0f }, 
 		z_norm{ 0.0f }, 
-		zr_2{ 0.0 }, 
-		zi_2{0.0},
-		tempi{ 0.0 };
+		zr_2{ 0.0f }, 
+		zi_2{0.0f},
+		tempi{0.0f};
 
-	while (--iterations &&  z_norm < 4.0)
+	while (--iterations &&  z_norm < BORDER)
 	{
 		tempi = zr * zi;
-
-		zi = tempi + tempi + ci;
+		zi =  tempi + tempi + ci;
 		zr = zr_2 - zi_2 + cr;
 
 		zr_2 = zr * zr;
@@ -72,9 +52,6 @@ void global_sequential_local_sequential(int const images) {
 		for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 			data[i] = { 0, 0, valueHost(i, o) };
 		}
-#ifdef STOREIMAGES
-		bitmaps[o].to_file("../img/cpu_gs_ls_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
 	}
 }
 
@@ -87,9 +64,6 @@ void global_parallel_local_sequential_task(int const images, int const outer_siz
 			for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
-#ifdef STOREIMAGES
-			bitmaps[o].to_file("./cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
 		}
 		});
 }
@@ -98,35 +72,25 @@ void global_parallel_local_parallel_task(int const images, int const inner_size,
 	// one thread per image
 	pfc::parallel_range(true, outer_size, images, [inner_size](int thread_idx, int begin, int end) {
 		for (auto o{ begin }; o < end; ++o) {
-			auto data{ bitmaps[o].pixel_span().data() };
 			// foreach pixel in image
-			pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
+			pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data{ bitmaps[o].pixel_span().data() }, o](int innerIdx, int begin, int end) {
 				for (auto i{ begin }; i < end; ++i) {
 					data[i] = { 0, 0, valueHost(i, o) };
 				}
-				});
-#ifdef STOREIMAGES
-			bitmaps[o].to_file("../img/cpu_gp_lp_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
+			});
 		}
 		});
 }
 
-void global_parallel_local_parallel_task2(int const images, int const inner_size, int const outer_size) {
+void global_parallel_local_parallel_task2(int const images, int const inner_size) {
 	// one thread per image
-	pfc::parallel_range(true, outer_size, images, [inner_size](int thread_idx, int begin, int end) {
-		for (auto o{ begin }; o < end; ++o) {
-			auto data{ bitmaps[o].pixel_span().data() };
-			// foreach pixel in image
-			pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
-				for (auto i{ begin }; i < end; ++i) {
-					data[i] = { 0, 0, valueHost2(i, o) };
-				}
-				});
-#ifdef STOREIMAGES
-			bitmaps[o].to_file("../img/cpu_gp_lp2_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
-		}
+	pfc::parallel_range(true, images, images, [inner_size](int o, int begin, int end) {
+		// foreach pixel in image
+		pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data{ bitmaps[o].pixel_span().data() }, o](int innerIdx, int begin, int end) {
+			for (auto i{ begin }; i < end; ++i) {
+				data[i] = { 0, 0, valueHost(i, o) };
+			}
+		});
 		});
 }
 
@@ -140,9 +104,6 @@ void global_sequential_local_prallel_task(int const images, int const inner_size
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
 			});
-#ifdef STOREIMAGES
-		bitmaps[o].to_file("../img/cpu_gs_lp_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
 	}
 }
 
@@ -155,9 +116,6 @@ void global_parallel_local_sequential_thread(int const images, int const outer_s
 			for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
-#ifdef STOREIMAGES
-			bitmaps[o].to_file("../img/cpu_gp_ls_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
 		}
 		});
 }
@@ -174,9 +132,6 @@ void global_parallel_local_parallel_thread(int const images, int const inner_siz
 					data[i] = { 0, 0, valueHost(i, o) };
 				}
 				});
-#ifdef STOREIMAGES
-			bitmaps[o].to_file("../img/cpu_gp_lp_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
 		}
 		});
 }
@@ -191,9 +146,6 @@ void global_sequential_local_prallel_thread(int const images, int const inner_si
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
 			});
-#ifdef STOREIMAGES
-		bitmaps[o].to_file("../img/cpu_gs_lp_" + std::to_string(o + 1) + ".bmp");
-#endif // STOREIMAGES
 	}
 }
 
@@ -208,5 +160,11 @@ void init_CPU() {
 
 	for (auto i{ 0 }; i < max_images; ++i) {
 		bitmaps.emplace_back(pfc::bitmap{ WIDTH, HEIGHT });
+	}
+}
+
+void storeImagesCPU(int const images, std::string const &prefix) {
+	for (auto o{ 0 }; o < images; ++o) {
+		bitmaps[o].to_file("../img/" + prefix + "_" + std::to_string(o + 1) + ".bmp");
 	}
 }
