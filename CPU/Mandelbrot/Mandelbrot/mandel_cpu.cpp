@@ -6,12 +6,11 @@
 #include <vector>
 
 #include "pfc_complex.h"
+#include "shared_bitmap.h"
 
 // precalculated indices for value mapping
 std::vector<int> X_VAL;
 std::vector<int> Y_VAL;
-
-std::vector<pfc::bitmap> bitmaps;
 
 pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
 	// calculate the constant
