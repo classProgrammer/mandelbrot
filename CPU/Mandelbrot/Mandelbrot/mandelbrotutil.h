@@ -10,9 +10,11 @@ bool foundDevice();
 
 template<typename F, typename... Args>
 float measureTime(F& func, Args&&... args) {
+	std::cout << "start of run" << std::endl;
 	auto const device_start{ std::chrono::high_resolution_clock::now() };
 	func(std::forward<Args>(args)...);
 	auto const device_finish{ std::chrono::high_resolution_clock::now() };
+	std::cout << "end of run" << std::endl;
 	auto device_elapsed{ device_finish - device_start };
 	typedef std::chrono::duration<float> float_seconds;
 	

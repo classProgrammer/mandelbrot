@@ -116,6 +116,13 @@ namespace pfc {
 		}
 	}
 
+	template <typename fun_t> void parallel_range_no_size(int const tasks, fun_t&& fun) {
+		task_group group; 
+		for (int t{ 0 }; t < tasks; ++t) {
+			group.add(std::forward <fun_t>(fun), t, 0, 0);
+		}
+	}
+
 	template <typename fun_t> void parallel_range(bool use_tasks, int const tasks, int const size, fun_t&& fun) {
 		if (use_tasks) {
 			task_group group; parallel_range <fun_t, task_group>(group, tasks, size, std::forward <fun_t>(fun));

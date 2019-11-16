@@ -96,7 +96,6 @@
   <ItemGroup>
     <ClInclude Include="kernel.cuh" />
     <ClInclude Include="mandelbrotutil.h" />
-    <ClInclude Include="mandel_constants_cpu.h" />
     <ClInclude Include="mandel_constants_gpu.h" />
     <ClInclude Include="mandel_cpu.h" />
     <ClInclude Include="mandel_gpu.h" />
