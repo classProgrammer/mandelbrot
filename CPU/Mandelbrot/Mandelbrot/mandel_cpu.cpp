@@ -53,7 +53,7 @@ pfc::byte_t valueHost(int const inner_idx, int const outer_index) {
 void global_sequential_local_sequential(int const images) {
 	for (auto o{ 0 }; o < images; ++o)
 	{
-		auto data{ bitmaps[o].pixel_span().data() };
+		auto data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() };
 		// foreach pixel in image
 		for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 			data[i] = { 0, 0, valueHost(i, o) };
@@ -65,7 +65,7 @@ void global_parallel_local_sequential_task(int const images) {
 	// one thread per image
 	pfc::parallel_range(true, images, images, [](int o, int begin, int end) {
 
-		auto data{ bitmaps[o].pixel_span().data() };
+		auto data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() };
 		// foreach pixel in image
 		for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 			data[i] = { 0, 0, valueHost(i, o) };
@@ -77,7 +77,7 @@ void global_parallel_local_parallel_task(int const images, int const inner_size)
 	// one thread per image
 	pfc::parallel_range(true, images, images, [inner_size](int o, int begin, int end) {
 		// foreach pixel in image
-		pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data{ bitmaps[o].pixel_span().data() }, o](int innerIdx, int begin, int end) {
+		pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() }, o](int innerIdx, int begin, int end) {
 			for (auto i{ begin }; i < end; ++i) {
 				data[i] = { 0, 0, valueHost(i, o) };
 			}
@@ -91,7 +91,7 @@ void global_parallel_local_parallel_task2(int const images, int const inner_size
 		unsigned int const o{ begin / PIXEL_PER_IMAGE };
 		begin %= PIXEL_PER_IMAGE;
 		end = (end -1) % PIXEL_PER_IMAGE + 1;
-		auto const data{ bitmaps[o].pixel_span().data() };
+		auto const data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() };
 
 		for (auto i{ begin }; i < end; ++i) {
 			data[i] = { 0, 0, valueHost(i, o) };
@@ -109,7 +109,7 @@ void global_parallel_local_parallel_task3(int const images, int const inner_size
 		auto const begin{ task_idx % tasks_per_img * one_unit };
 		auto const end{ begin + one_unit };
 
-		auto const data{ bitmaps[image_no].pixel_span().data() };
+		auto const data{ Globals_CPU::bitmapsCPU[image_no].pixel_span().data() };
 
 		for (auto i{ begin }; i < end; ++i) {
 			data[i] = { 0, 0, valueHost(i, image_no) };
@@ -120,7 +120,7 @@ void global_parallel_local_parallel_task3(int const images, int const inner_size
 void global_sequential_local_prallel_task(int const images, int const inner_size) {
 	for (auto o{ 0 }; o < images; ++o)
 	{
-		auto data{ bitmaps[o].pixel_span().data() };
+		auto data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() };
 		// foreach pixel in image
 		pfc::parallel_range(true, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
 			for (auto i{ begin }; i < end; ++i) {
@@ -135,7 +135,7 @@ void global_parallel_local_sequential_thread(int const images) {
 	pfc::parallel_range(false, images, images, [](int o, int begin, int end) {
 
 		// foreach pixel in image
-		auto data{ bitmaps[o].pixel_span().data() };
+		auto data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() };
 		for (auto i{ 0 }; i < PIXEL_PER_IMAGE; ++i) {
 			data[i] = { 0, 0, valueHost(i, o) };
 		}
@@ -145,7 +145,7 @@ void global_parallel_local_sequential_thread(int const images) {
 
 void global_parallel_local_parallel_thread(int const images, int const inner_size) {
 	pfc::parallel_range(false, images, images, [inner_size](int o, int begin, int end) {
-		auto data{ bitmaps[o].pixel_span().data() };
+		auto data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() };
 		// foreach pixel in image
 		pfc::parallel_range(false, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
 			for (auto i{ begin }; i < end; ++i) {
@@ -158,7 +158,7 @@ void global_parallel_local_parallel_thread(int const images, int const inner_siz
 void global_sequential_local_prallel_thread(int const images, int const inner_size) {
 	for (auto o{ 0 }; o < images; ++o)
 	{
-		auto data{ bitmaps[o].pixel_span().data() };
+		auto data{ Globals_CPU::bitmapsCPU[o].pixel_span().data() };
 		// foreach pixel in image
 		pfc::parallel_range(false, inner_size, PIXEL_PER_IMAGE, [data, o](int innerIdx, int begin, int end) {
 			for (auto i{ begin }; i < end; ++i) {
@@ -173,7 +173,7 @@ void init_CPU() {
 	static const int max_images{ 200 };
 
 	for (int i = 0; i < max_images; ++i) {
-		bitmaps[i] = pfc::bitmap{ WIDTH, HEIGHT };
+		Globals_CPU::bitmapsCPU[i] = pfc::bitmap{ WIDTH, HEIGHT };
 	}
 	std::cout << "Bitmaps Allocated" << std::endl;
 }
@@ -184,7 +184,7 @@ void storeImages(int const from, int const to, std::string const& prefix) {
 	auto const images{ to + 1 - from };
 
 	pfc::parallel_range(false, images, images, [prefix, from](int o, int begin, int end) {
-		bitmaps[o + from - 1].to_file("../img/" + prefix + "_" + std::to_string(o + from) + ".bmp");
+		Globals_CPU::bitmapsCPU[o + from - 1].to_file("../img/" + prefix + "_" + std::to_string(o + from) + ".bmp");
 		});
 	std::cout << "stored " << images << " images for " << prefix << std::endl;
 }

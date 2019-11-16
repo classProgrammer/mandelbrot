@@ -1,3 +1,6 @@
 #pragma once
 #include "pfc_bitmap_3.h"
-pfc::bitmap bitmaps[200];
+namespace Globals_CPU
+{
+	static pfc::bitmap bitmapsCPU[200];
+}
