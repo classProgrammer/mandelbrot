@@ -6,7 +6,7 @@
 #include "pfc_complex.h"
 #include "mandel_constants_gpu.h"
 #include "mandel_gpu.h"
-
+#include "shared_bitmap.h"
 // define to store the bmp files
 //#define STOREIMAGES
 

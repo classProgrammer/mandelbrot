@@ -47,7 +47,7 @@ void printResult(std::ostream &os, int const no_of_images, std::vector<float> co
 	printHeader(os, mib);
 
 	auto fastest{ 100000000.0f };
-	auto fastest_idx{ 0 };
+	auto fastest_idx{ -1 };
 
 	for (auto i{ 0 }; i < times.size(); ++i) {
 		printBlock(os, no_of_images, data, mib, times[i], labels[i]);
@@ -62,8 +62,9 @@ void printResult(std::ostream &os, int const no_of_images, std::vector<float> co
 			printSpeedup(os, times[i], labels[i], times[j], labels[j]);	
 		}
 	}
-
-	printFastest(os, no_of_images, data, mib, times[fastest_idx], labels[fastest_idx]);
+	if (fastest_idx > -1) {
+		printFastest(os, no_of_images, data, mib, times[fastest_idx], labels[fastest_idx]);
+	}
 	os << "++++++++ END RUN ++++++++" << std::endl << std::endl;
 }
 

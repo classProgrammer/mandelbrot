@@ -6,8 +6,7 @@
 
 bool foundDevice();
 
-// template to measure a functions execution time
-
+// Measure a functions execution time
 template<typename F, typename... Args>
 float measureTime(F& func, Args&&... args) {
 	std::cout << "start of run" << std::endl;
@@ -21,4 +20,5 @@ float measureTime(F& func, Args&&... args) {
 	return ((float)std::chrono::duration_cast<std::chrono::milliseconds>(device_elapsed).count()) / 1000.0f;
 };
 
+// print the formatted result
 void printResult(std::ostream &os, int const no_of_images, std::vector<float> const& times, std::vector<std::string> const& labels);

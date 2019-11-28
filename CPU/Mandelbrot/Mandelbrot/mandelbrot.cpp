@@ -1,7 +1,6 @@
 #include <vector>
 #include "mandelbrotutil.h"
-#include "mandel_cpu.h"
-#include "mandel_gpu.h"
+#include "mandel.h"
 #include "mandel_constants_gpu.h"
 #include "pfc_threading.h"
 #include<string>  
@@ -17,16 +16,15 @@
 
 
 void runTests() {
-	auto const images{ 25 };
+	auto const images{ NO_OF_IMAGES };
 
 	auto const chunk_size_bitmap{ 50 }; // 70 sometimes out of memory
 	// best is 1/4 row
 	auto const BEST_INNER_SIZE{ WIDTH / 16 };
 
-
 	// precalcualtes values to increase performance
-	init_CPU();
-
+	initGPU();
+	initCPU();
 	//factorWrite();
 
 	std::vector<float> times;
@@ -141,75 +139,43 @@ void runTests() {
 	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, BEST_INNER_SIZE));
 	//labels.emplace_back("gp_lp_task_v1");
 
-	//storeImages(95, 100, "gp_lp_v1");
 
+	//auto const no_of_tasks{ HEIGHT * images * 2 };
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task, images, WIDTH/ 16));
+	//labels.emplace_back("GP_LP_task_v1");			
+	//
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task2, 10, WIDTH/ 16));
+	//labels.emplace_back("GP_LP_task_v2");		
+	//storeImages(10, "GP_LP_task_v2");
 
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task3, images, WIDTH / 8));
+	//labels.emplace_back("GP_LP_task_v3");		
 	
-	auto const no_of_tasks{ HEIGHT * images * 2 };
-	times.emplace_back(measureTime(global_parallel_local_parallel_task3, images, no_of_tasks));
-	labels.emplace_back("GP_LP_task_v3_2");	
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task2, images, WIDTH/ 16));
+	//labels.emplace_back("GP_LP_task_");	
 
-	//storeImages(185, 200, "gp_lp_v3");
+
+	//times.emplace_back(measureTime(sequential_gpu_bitmap, images));
+	//labels.emplace_back("sequential_GPU_bitmap");
+	//storeLastImage(200, "gpu");
+
+	times.emplace_back(measureTime(parallel_streamed_GPU, 10));
+	labels.emplace_back("parallel_streamed");
+	storeImages(10, "parallel_streamed");
+
 
 	printResult(std::cout, images, times, labels);
-
+	freeGPU();
 }
 
 int main() {
 
 	if (!foundDevice()) {
 		std::cout << "!!!!!!!!!! FAILED, no device found !!!!!!!!!!" << std::endl;
+		return 1;
 	}
 
-
-
-
-	//unsigned int size{ 10 };
-	//unsigned int innerSize{ 5 };
-	//unsigned int no_of_imges{ 3 };
-
-	//for (int i = 0; i < size * no_of_imges; i += innerSize) {
-	//	auto begin = i;
-	//	auto end = i + innerSize;
-
-	//	auto const o{ begin / size };
-	//	begin %= size;
-	//	end = (end -1) % size + 1;
-	//	
-	//	std::cout << "range (" << begin << " - " << end << "), image: " << o << std::endl;
-	//}
-
-
-
-	//const unsigned long int images = 3;
-	//const unsigned long  pixel = 20;
-	//const unsigned int height = 5;
-	//const unsigned int width = 4;
-	//long long int const size{ pixel * images };
-	//const int inner_size = height * images;
-	//// height * images = one task per WIDTH
-	//// height * images * 2 = one task per WIDTH / 2
-
-	//static auto const one_unit = size / inner_size;
-	//static auto const threads_per_img = inner_size / images;
-
-	//std::cout << "inner_size = " << inner_size << ", one_unit = " << one_unit << std::endl;
-
-	//pfc::parallel_range(true, inner_size, inner_size, [size, inner_size](int thread_idx, unsigned int begin, unsigned int end) {
-
-	//	//o = ?
-
-	//	//int const o{ begin / size };
-	//	begin = thread_idx % threads_per_img * one_unit ;
-	//	end = begin + one_unit;
-	//	auto const image = thread_idx / threads_per_img;
-
-	//	std::string str = "image " + std::to_string(image) + " => (" + std::to_string(begin) + ", " + std::to_string(end)+ ")\n";
-	//	
-	//	std::cout << str;
-
-	//	});
-
 	runTests();
+
 	return 0;
 }
