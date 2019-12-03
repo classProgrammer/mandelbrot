@@ -8,7 +8,7 @@ auto constexpr WIDTH{ 8192 };
 auto constexpr HEIGHT{ 4608 };
 auto constexpr PIXEL_PER_IMAGE{ WIDTH * HEIGHT }; // 37.748.736
 
-auto constexpr CPU_PARALLEL_SIZE{ 10 };
+auto constexpr CPU_PARALLEL_SIZE{ 20 };
 
 auto constexpr NO_OF_IMAGES{200};
 

@@ -18,24 +18,17 @@ void global_sequential_local_prallel_task(int const images, int const inner_size
 // GP LP
 void global_parallel_local_parallel_thread(int const images, int const inner_size);
 void global_parallel_local_parallel_task(int const images, int const inner_size);
-void global_parallel_local_parallel_task2(int const images, int const no_of_tasks);
 //void global_parallel_local_parallel_task3(int const images, int const inner_size);
 
 
 // GPU functions
 // sequential
-void sequential_gpu_byte(int const images);
-void sequential_gpu_bitmap(int const images);
+void sequential_gpu(int const images);
 
 // parallel
-void parallel_gpu_bitmap_chunked(int const images, int const chunk_size);
-void parallel_gpu_byte_chunked(int const images, int const chunk_size);
-
-void parallel_gpu_byte_all(int const images);
-void parallel_gpu_bitmap_all(int const images);
-
-// parallel
-void parallel_streamed_GPU(int const images);
+void parallel_streamed_GPU_prallel_range(int const images);
+void parallel_streamed_GPU_for_loop(int const images);
+void parallel_GPU_stream0(int const images);
 
 // Lifecycle methods
 void initCPU();

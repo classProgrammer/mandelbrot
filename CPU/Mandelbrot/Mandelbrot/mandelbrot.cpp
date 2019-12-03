@@ -159,12 +159,64 @@ void runTests() {
 	//labels.emplace_back("sequential_GPU_bitmap");
 	//storeLastImage(200, "gpu");
 
-	times.emplace_back(measureTime(parallel_streamed_GPU, 10));
-	labels.emplace_back("parallel_streamed");
-	storeImages(10, "parallel_streamed");
+	// ---------------------------------------------------------------------------------
+	// --------------------------------   CPU   ----------------------------------------
+	// ---------------------------------------------------------------------------------
 
+	// GS_LS
+	//times.emplace_back(measureTime(global_sequential_local_sequential, 10));
+	//labels.emplace_back("gs_ls");
+	//storeImages(10, "gs_ls");
 
-	printResult(std::cout, images, times, labels);
+	// GP_LS
+	//times.emplace_back(measureTime(global_parallel_local_sequential_task, 40));
+	//labels.emplace_back("gp_ls_task");
+	//storeImages(40, "gp_ls_task");
+
+	//times.emplace_back(measureTime(global_parallel_local_sequential_thread, 40));
+	//labels.emplace_back("gp_ls_thread");
+	//storeLastImage(40, "gp_ls_thread");
+
+	// GS_LP
+	//times.emplace_back(measureTime(global_sequential_local_prallel_task, 40, WIDTH / 16));
+	//labels.emplace_back("gs_lp_task");
+	//storeImages(40, "gs_lp_task");
+
+	//times.emplace_back(measureTime(global_sequential_local_prallel_thread, 40, WIDTH / 16));
+	//labels.emplace_back("gs_lp_task");
+	//storeLastImage(40, "gs_lp_task");
+
+	// GP_LP
+	//times.emplace_back(measureTime(global_parallel_local_parallel_task, 200, WIDTH / 16));
+	//labels.emplace_back("gp_lp_task");
+	//storeImages(200, "gp_lp_task");
+
+	
+	//times.emplace_back(measureTime(global_parallel_local_parallel_thread, 40, WIDTH / 16));
+	//labels.emplace_back("gp_lp_thread");
+	//storeImages(40, "gp_lp_thread");
+
+	// ---------------------------------------------------------------------------------
+	// --------------------------------   GPU   ----------------------------------------
+	// ---------------------------------------------------------------------------------
+
+	//times.emplace_back(measureTime(parallel_streamed_GPU_prallel_range, 20));
+	//labels.emplace_back("gpu_paralell_range_stream");
+	//storeLastImage(20, "gpu_paralell_range_stream");
+
+	//times.emplace_back(measureTime(parallel_streamed_GPU_for_loop, 20));
+	//labels.emplace_back("gpu_for_streamed");
+	//storeLastImage(20, "gpu_for_streamed");
+
+	times.emplace_back(measureTime(sequential_gpu, 200));
+	labels.emplace_back("gpu_sequential");
+	storeLastImage(200, "gpu_sequential");
+
+	//times.emplace_back(measureTime(parallel_GPU_stream0, 20));
+	//labels.emplace_back("gpu_parallel_stream0");
+	//storeLastImage(20, "gpu_parallel_stream0");
+
+	printResult(std::cout, 20, times, labels);
 	freeGPU();
 }
 
