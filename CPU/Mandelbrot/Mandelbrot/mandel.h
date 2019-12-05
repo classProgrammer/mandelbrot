@@ -18,17 +18,10 @@ void global_sequential_local_prallel_task(int const images, int const inner_size
 // GP LP
 void global_parallel_local_parallel_thread(int const images, int const inner_size);
 void global_parallel_local_parallel_task(int const images, int const inner_size);
-//void global_parallel_local_parallel_task3(int const images, int const inner_size);
 
 
 // GPU functions
-// sequential
 void sequential_gpu(int const images);
-
-// parallel
-void parallel_streamed_GPU_prallel_range(int const images);
-void parallel_streamed_GPU_for_loop(int const images);
-void parallel_GPU_stream0(int const images);
 
 // Lifecycle methods
 void initCPU();
