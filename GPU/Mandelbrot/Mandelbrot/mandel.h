@@ -3,24 +3,6 @@
 #include "pfc_types.h"
 #include "mandel_constants_gpu.h"
 
-// CPU functions
-// GS LS
-void global_sequential_local_sequential(int const images);
-
-// GP LS
-void global_parallel_local_sequential_thread(int const images);
-void global_parallel_local_sequential_task(int const images);
-
-// GS LP
-void global_sequential_local_prallel_thread(int const images, int const inner_size);
-void global_sequential_local_prallel_task(int const images, int const inner_size);
-
-// GP LP
-void global_parallel_local_parallel_thread(int const images, int const inner_size);
-void global_parallel_local_parallel_task(int const images, int const inner_size);
-//void global_parallel_local_parallel_task3(int const images, int const inner_size);
-
-
 // GPU functions
 // sequential
 void sequential_gpu(int const images);
