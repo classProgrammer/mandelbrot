@@ -9,16 +9,15 @@
 auto constexpr THREADS{ 1024 };
 auto constexpr BLOCKS{ 36864 };
 auto constexpr USE_TASKS{ true };
-auto constexpr USE_THREADS{ false };
 
 pfc::bitmap bitmaps[CPU_PARALLEL_SIZE];
-// GPU
-auto constexpr DEVICE_SIZE{ 20 };
+auto constexpr DEVICE_SIZE{ CPU_PARALLEL_SIZE };
 auto constexpr MEMORY_SIZE{ PIXEL_PER_IMAGE * sizeof(pfc::BGR_4_t) };
 std::vector<pfc::BGR_4_t*> bgrDevicePointers;
 cudaStream_t streams[CPU_PARALLEL_SIZE];
 
 void initCPU() {
+	gpuErrchk(cudaSetDeviceFlags(cudaDeviceMapHost)); // needed for cudeGetDevicePointer to work
 	std::cout << "Allocating Bitmaps" << std::endl;
 	static constexpr auto max_images{ CPU_PARALLEL_SIZE };
 	pfc::parallel_range(USE_TASKS, 10, max_images, [](int const o, int const begin, int const end) {
@@ -28,10 +27,33 @@ void initCPU() {
 			for (auto i{ 0 }; i < (PIXEL_PER_IMAGE); ++i) {
 				data[i] = { 0, 0, 0 };
 			}
-			cudaHostRegister(bitmaps[i].pixel_span().data(), MEMORY_SIZE, cudaHostAllocPortable);
+			gpuErrchk(cudaHostRegister(bitmaps[i].pixel_span().data(), MEMORY_SIZE, cudaHostRegisterMapped));
 		}
 		});
 	std::cout << "Bitmaps Allocated" << std::endl;
+}
+
+void initGPU() {
+	std::cout << "Alloc GPU memory" << std::endl;
+	
+
+	for (auto i{ 0 }; i < DEVICE_SIZE; ++i) {
+		pfc::bitmap::pixel_type * dp_destination_bgr{ nullptr };
+
+		// produces endless loop ???
+		//gpuErrchk(cudaHostGetDevicePointer(&dp_destination_bgr, bitmaps[i].pixel_span().data(), 0))
+
+		gpuErrchk(cudaMalloc(&dp_destination_bgr, MEMORY_SIZE));
+		bgrDevicePointers.emplace_back(dp_destination_bgr);
+		gpuErrchk(cudaStreamCreateWithFlags(&streams[i], cudaStreamNonBlocking));
+	}
+
+	std::cout << "Allocated GPU memory" << std::endl;
+}
+
+void freeGPU() {
+	gpuErrchk(cudaDeviceReset());
+	std::cout << "Freed GPU memory" << std::endl;
 }
 
 void storeLastImage(int const calculated_images, std::string const& prefix) {
@@ -58,28 +80,6 @@ void sequential_gpu(int const images) {
 	}
 }
 
-void freeGPU() {
-	gpuErrchk(cudaDeviceReset());
-	std::cout << "Freed GPU memory" << std::endl;
-}
-
-
-void initGPU() {
-	std::cout << "Alloc GPU memory" << std::endl;
-
-	for (auto i{ 0 }; i < DEVICE_SIZE; ++i) {
-		pfc::BGR_4_t* dp_destination_bgr{ nullptr };
-		gpuErrchk(cudaMalloc(&dp_destination_bgr, MEMORY_SIZE));
-		bgrDevicePointers.emplace_back(dp_destination_bgr);
-		gpuErrchk(cudaStreamCreate(&streams[i]));
-	}
-
-	std::cout << "Allocated GPU memory" << std::endl;
-}
-
-auto constexpr no_of_images_per_stream{ 200 / CPU_PARALLEL_SIZE };
-auto constexpr no_of_streams{ CPU_PARALLEL_SIZE };
-
 void parallel_streamed_GPU_prallel_range(int const images) {
 
 	pfc::parallel_range(USE_TASKS, DEVICE_SIZE, images, [images](int const t, int const begin, int const end) {
@@ -94,17 +94,3 @@ void parallel_streamed_GPU_prallel_range(int const images) {
 		}
 	});
 }
-
-void parallel_streamed_GPU_for_loop(int const images) {
-	for (int t = 0; t < 20; ++t) {
-		for (auto i{ t }; i < images; i += CPU_PARALLEL_SIZE) {
-			call_mandel_kernel(BLOCKS, THREADS, bgrDevicePointers[t], PIXEL_PER_IMAGE, i, streams[t]);
-			gpuErrchk(cudaPeekAtLastError());
-
-			gpuErrchk(cudaMemcpyAsync(bitmaps[t].pixel_span().data(), bgrDevicePointers[t], MEMORY_SIZE, cudaMemcpyDeviceToHost, streams[t]));
-
-			gpuErrchk(cudaStreamSynchronize(streams[t]));
-		}
-	};
-}
-

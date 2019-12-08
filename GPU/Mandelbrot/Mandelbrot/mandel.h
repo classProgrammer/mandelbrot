@@ -6,11 +6,7 @@
 // GPU functions
 // sequential
 void sequential_gpu(int const images);
-
-// parallel
 void parallel_streamed_GPU_prallel_range(int const images);
-void parallel_streamed_GPU_for_loop(int const images);
-
 
 // Lifecycle methods
 void initCPU();
