@@ -17,10 +17,7 @@
 
 void runTests() {
 	auto const images{ NO_OF_IMAGES };
-	auto const chunk_size_bitmap{ 50 }; 
-	auto const BEST_INNER_SIZE{ WIDTH / 16 };
 
-	// precalcualtes values to increase performance
 	initGPU();
 	initCPU();
 
@@ -31,23 +28,19 @@ void runTests() {
 	// --------------------------------   GPU   ----------------------------------------
 	// ---------------------------------------------------------------------------------
 
-	//times.emplace_back(measureTime(parallel_streamed_GPU_prallel_range, 20));
-	//labels.emplace_back("gpu_paralell_range_stream");
-	//storeLastImage(20, "gpu_paralell_range_stream");
+	times.emplace_back(measureTime(parallel_streamed_GPU_prallel_range, images));
+	labels.emplace_back("gpu_paralell_range_stream");
+	storeLastImage(images, "gpu_paralell_range_stream");
 
-	//times.emplace_back(measureTime(parallel_streamed_GPU_for_loop, 20));
-	//labels.emplace_back("gpu_for_streamed");
-	//storeLastImage(20, "gpu_for_streamed");
+	times.emplace_back(measureTime(parallel_streamed_GPU_for_loop, images));
+	labels.emplace_back("gpu_for_streamed");
+	storeLastImage(images, "gpu_for_streamed");
 
-	times.emplace_back(measureTime(sequential_gpu, 200));
+	times.emplace_back(measureTime(sequential_gpu, images));
 	labels.emplace_back("gpu_sequential");
-	storeLastImage(200, "gpu_sequential");
+	storeLastImage(images, "gpu_sequential");
 
-	//times.emplace_back(measureTime(parallel_GPU_stream0, 20));
-	//labels.emplace_back("gpu_parallel_stream0");
-	//storeLastImage(20, "gpu_parallel_stream0");
-
-	printResult(std::cout, 20, times, labels);
+	printResult(std::cout, images, times, labels);
 	freeGPU();
 }
 
