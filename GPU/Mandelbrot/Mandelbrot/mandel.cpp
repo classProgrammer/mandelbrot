@@ -17,15 +17,14 @@ std::vector<pfc::BGR_4_t*> bgrDevicePointers;
 cudaStream_t streams[CPU_PARALLEL_SIZE];
 
 void initCPU() {
-	gpuErrchk(cudaSetDeviceFlags(cudaDeviceMapHost)); // needed for cudeGetDevicePointer to work
+	gpuErrchk(cudaSetDeviceFlags(cudaDeviceMapHost));
 	std::cout << "Allocating Bitmaps" << std::endl;
-	static constexpr auto max_images{ CPU_PARALLEL_SIZE };
-	pfc::parallel_range(USE_TASKS, 10, max_images, [](int const o, int const begin, int const end) {
+	pfc::parallel_range(USE_TASKS, 10, CPU_PARALLEL_SIZE, [](int const o, int const begin, int const end) {
 		for (auto i{ begin }; i < end; ++i) {
 			bitmaps[i] = pfc::bitmap{ WIDTH, HEIGHT };
 			auto data{ bitmaps[i].pixel_span().data() };
-			for (auto i{ 0 }; i < (PIXEL_PER_IMAGE); ++i) {
-				data[i] = { 0, 0, 0 };
+			for (auto j{ 0 }; j < (PIXEL_PER_IMAGE); ++j) {
+				data[j] = { 0, 0, 0 }; // initialize to black
 			}
 			gpuErrchk(cudaHostRegister(bitmaps[i].pixel_span().data(), MEMORY_SIZE, cudaHostRegisterMapped));
 		}
@@ -35,19 +34,12 @@ void initCPU() {
 
 void initGPU() {
 	std::cout << "Alloc GPU memory" << std::endl;
-	
-
 	for (auto i{ 0 }; i < DEVICE_SIZE; ++i) {
 		pfc::bitmap::pixel_type * dp_destination_bgr{ nullptr };
-
-		// produces endless loop ???
-		//gpuErrchk(cudaHostGetDevicePointer(&dp_destination_bgr, bitmaps[i].pixel_span().data(), 0))
-
 		gpuErrchk(cudaMalloc(&dp_destination_bgr, MEMORY_SIZE));
 		bgrDevicePointers.emplace_back(dp_destination_bgr);
 		gpuErrchk(cudaStreamCreateWithFlags(&streams[i], cudaStreamNonBlocking));
 	}
-
 	std::cout << "Allocated GPU memory" << std::endl;
 }
 
@@ -84,8 +76,10 @@ void parallel_streamed_GPU_prallel_range(int const images) {
 
 	pfc::parallel_range(USE_TASKS, DEVICE_SIZE, images, [images](int const t, int const begin, int const end) {
 
-		for (auto i{ t }; i < images; i += CPU_PARALLEL_SIZE) {
+		for (auto i{ t }; i < images; i += CPU_PARALLEL_SIZE) 
+		{
 			call_mandel_kernel(BLOCKS, THREADS, bgrDevicePointers[t], PIXEL_PER_IMAGE, i, streams[t]);
+
 			gpuErrchk(cudaPeekAtLastError());
 
 			gpuErrchk(cudaMemcpyAsync(bitmaps[t].pixel_span().data(), bgrDevicePointers[t], MEMORY_SIZE, cudaMemcpyDeviceToHost, streams[t]));
